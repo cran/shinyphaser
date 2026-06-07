@@ -1,0 +1,335 @@
+#' @importFrom rlang %||%
+#'
+#' @title PhaserGame
+#' @description R6 class to create and manage a Phaser game within a Shiny application.
+#' Provides methods for adding sprites, animations, images, backgrounds, controls, and collision handling.
+#'
+#' @export
+PhaserGame <- R6::R6Class(
+  "PhaserGame",
+  public = list(
+    #' @field id Character. ID of the Game container. Used as the HTML element ID where the game canvas will be rendered.
+    id = NULL,
+
+    #' @description Create a PhaserGame object with the given configuration.
+    #' @param id Character. ID of the Game container (defaults to "phaser_game").
+    #' @param width Numeric. Width of the Phaser canvas in pixels (defaults to 800).
+    #' @param height Numeric. Height of the Phaser canvas in pixels (defaults to 600).
+    #' @return A new PhaserGame object.
+    #' @examples
+    #' game <- PhaserGame$new(id = "my_game", width = 1024, height = 768)
+    initialize = function(id = "phaser_game",
+                          width = 800,
+                          height = 600) {
+      self$id <- id
+
+      private$config <- list(
+        width = width,
+        height = height
+      )
+    },
+
+    #' @description Set the Shiny session used to send Phaser custom messages.
+    #' @param session Shiny session object (default: shiny::getDefaultReactiveDomain()).
+    set_shiny_session = function(session = shiny::getDefaultReactiveDomain()) {
+      private$session <- session
+    },
+
+    #' @description Load dependencies and initialize the Phaser game in the UI.
+    #' @return HTML tag list containing dependencies and initialization script.
+    #' @examples
+    #'  game$use_phaser()
+    use_phaser = function() {
+      shiny::addResourcePath("assets", system.file("assets", package = "shinyphaser"))
+      htmltools::tagList(
+        phaser_dependency(),
+        htmltools::tags$div(id = self$id, style = "width:100vw; height:100vh;"),
+        htmltools::htmlDependency(
+          name = "shinyphaser-assets",
+          version = "0.1",
+          package = "shinyphaser",
+          src = "www",
+          script = c("phaser-game.js", "phaser-groups.js",
+                     "phaser-sprite.js", "phaser-image.js")
+        ),
+        htmltools::tags$script(
+          sprintf("initPhaserGame('%s', %s);", self$id,
+                  jsonlite::toJSON(private$config, auto_unbox = TRUE))
+        )
+      )
+    },
+
+    #' @description Add a text object to the Phaser scene.
+    #' @param text Character. Text value to display.
+    #' @param id Character. Unique ID for the text object.
+    #' @param x Numeric. X-coordinate in pixels.
+    #' @param y Numeric. Y-coordinate in pixels.
+    #' @param style Named list. Styling options passed to Phaser text rendering.
+    add_text = function(text, id, x, y, style = list(font_size = '22px')) {
+      return(Text$new(text, id, x, y, style))
+    },
+
+    #' @description Add a rectangle object to the Phaser scene.
+    #' @param name Character. Unique name for the rectangle.
+    #' @param x Numeric. X-coordinate in pixels.
+    #' @param y Numeric. Y-coordinate in pixels.
+    #' @param width Numeric. Rectangle width in pixels.
+    #' @param height Numeric. Rectangle height in pixels.
+    #' @param color Character. Fill color in Phaser-compatible format.
+    #' @param visible Logical. Whether rectangle is initially visible.
+    #' @param clickable Logical. Whether rectangle emits click events.
+    add_rectangle = function(name, x, y, width, height, color, visible = TRUE, clickable = FALSE) {
+      return(Rectangle$new(name, x, y, width, height, color, visible, clickable))
+    },
+
+    #' @description Adds a static image to the Phaser scene.
+    #' @param name Character. Unique key to reference this image.
+    #' @param url Character. URL or path to the image file.
+    #' @param x Numeric. X-coordinate in pixels.
+    #' @param y Numeric. Y-coordinate in pixels.
+    #' @param visible Logical. Whether the image is initially visible (default: TRUE).
+    #' @param clickable Logical. Whether the image should emit click events (default: FALSE).
+    add_image = function(name, url, x, y, visible = TRUE, clickable = FALSE) {
+      return(Image$new(name, url, x, y, visible, clickable))
+    },
+
+    #' @description Add a background (tilemap) layer from Tiled JSON + tileset image(s).
+    #' @param map_key Character. Key for the tilemap JSON.
+    #' @param map_url Character. URL of the Tiled JSON file (relative to www/assets/).
+    #' @param tileset_urls Character vector. URLs of tileset image files.
+    #' @param tileset_names Character vector. Names of tilesets as defined in Tiled.
+    #' @param layer_name Character. Name of the layer to render from Tiled.
+    #' @return Invisible; sends a custom message to the client.
+    add_map = function(map_key,
+                       map_url,
+                       tileset_urls,
+                       tileset_names,
+                       layer_name) {
+      js <- sprintf(
+        "addMap(%s, %s, %s, %s, %s);",
+        jsonlite::toJSON(map_key, auto_unbox = TRUE),
+        jsonlite::toJSON(map_url, auto_unbox = TRUE),
+        jsonlite::toJSON(tileset_urls, auto_unbox = TRUE),
+        jsonlite::toJSON(tileset_names, auto_unbox = TRUE),
+        jsonlite::toJSON(layer_name, auto_unbox = TRUE)
+      )
+      send_js(private, js)
+    },
+
+    #' @description Enable terrain collision for a player sprite.
+    #' @param name Character. Name of the player sprite (as added via add_player_sprite).
+    enable_terrain_collision = function(name) {
+      js <- sprintf("addPlayerTerrainCollider('%s');", name)
+      send_js(private, js)
+    },
+
+    #' @description Load a base spritesheet and create an "idle" animation.
+    #' @param name Character. Unique key for the sprite and its idle animation.
+    #' @param url Character. URL or path to the spritesheet image.
+    #' @param x Numeric. X-coordinate in pixels.
+    #' @param y Numeric. Y-coordinate in pixels.
+    #' @param frame_width Numeric. Width of each frame.
+    #' @param frame_height Numeric. Height of each frame.
+    #' @param frame_count Numeric. Number of frames in the spritesheet.
+    #' @param frame_rate Numeric. Frames per second for the idle animation.
+    add_sprite = function(name, url,
+                          x, y,
+                          frame_width, frame_height,
+                          frame_count = 1, frame_rate = 1) {
+      return(Sprite$new(name, url, x, y, frame_width, frame_height, frame_count, frame_rate))
+    },
+
+    #' @description Adds a dynamic group from a spritesheet.
+    #' @param name Character. Unique name of the group.
+    add_group = function(name) {
+      return(Group$new(name))
+   },
+
+    #' @description Adds a static sprite to the scene (non-animated).
+    #' @param name Character. Unique name of the sprite.
+    #' @param url Character. URL or path to the image file.
+    #' @param x Numeric. X-coordinate in pixels.
+    #' @param y Numeric. Y-coordinate in pixels.
+    add_static_sprite = function(name, url, x, y) {
+      return(StaticSprite$new(name, url, x, y))
+    },
+
+    #' @description Adds a static group to the scene (non-animated).
+    #' @param name Character. Unique name of the group.
+    #' @param url Character. URL or path to the image file.
+    add_static_group = function(name, url) {
+      return(StaticGroup$new(
+        name = name,
+        url = url
+      ))
+    },
+
+    #' @description Adds a collider between two game objects.
+    #' @param object_one Character. Name of the first object.
+    #' @param object_two Character. Name of the second object.
+    #' @param group Character. Name of the group to compare against.
+    #' @param callback_fun A function to be run when collision occurs.
+    #' @param input Shiny input list.
+    add_collider = function(object_one,
+                            object_two = NULL,
+                            group = NULL,
+                            callback_fun = NULL,
+                            input) {
+      input_id <- paste(
+        c("collide", object_one,
+          object_two %||% group),
+        collapse = "_"
+      )
+
+      js <- if (!is.null(object_two)) {
+        sprintf("addCollider('%s','%s','%s')",
+                object_one, object_two, input_id)
+      } else {
+        sprintf("addGroupCollider('%s','%s','%s')",
+                object_one, group, input_id)
+      }
+      send_js(private, js)
+      if (!is.null(callback_fun)) {
+        shiny::observeEvent(input[[input_id]], {
+          evt <- input[[input_id]]
+          callback_fun(evt)
+        }, ignoreNULL = TRUE)
+      }
+    },
+
+    #' @description Adds a collider between two game objects.
+    #' @param object_one Character. Name of the first object.
+    #' @param object_two Character. Name of the second object.
+    #' @param group Character. Name of the group.
+    #' @param callback_fun A function to be run when overlap occurs.
+    #' @param input Shiny input list.
+    add_overlap = function(object_one,
+                           object_two = NULL,
+                           group = NULL,
+                           callback_fun,
+                           input) {
+      Sys.sleep(0.1)
+      input_id <- paste(
+        c("overlap", object_one,
+          object_two %||% group),
+        collapse = "_"
+      )
+
+      js <- if (!is.null(object_two)) {
+        sprintf("addOverlap('%s','%s','%s')",
+                object_one, object_two, input_id)
+      } else {
+        sprintf("addGroupOverlap('%s','%s','%s')",
+                object_one, group, input_id)
+      }
+      send_js(private, js)
+
+      shiny::observeEvent(input[[input_id]], {
+        evt <- input[[input_id]]
+        callback_fun(evt)
+      }, ignoreNULL = TRUE)
+    },
+
+   #' @description Create a reactive expression for overlap state between two objects.
+   #' @param object_one Character. Name of the first object.
+   #' @param object_two Character. Name of the second object.
+   #' @param input Shiny input list.
+   are_overlap = function(object_one,
+                          object_two,
+                          input) {
+     input_id <- paste(
+       c("are_overlap", object_one,
+         object_two %||% group),
+       collapse = "_"
+     )
+     js <- sprintf("areOverlap('%s','%s','%s')",
+            object_one, object_two, input_id)
+     send_js(private, js)
+     shiny::eventReactive(input[[input_id]], {
+       input[[input_id]]
+     })
+    },
+
+   #' @description Register a callback fired when overlap between objects ends.
+   #' @param object_one Character. Name of the first object.
+   #' @param object_two Character. Name of the second object.
+   #' @param group Character. Name of the group to compare against.
+   #' @param callback_fun Function. Callback executed when overlap ends.
+   #' @param input Shiny input list.
+   #' @param session Shiny session object.
+   add_overlap_end = function(object_one,
+                              object_two = NULL,
+                              group = NULL,
+                              callback_fun,
+                              input,
+                              session = shiny::getDefaultReactiveDomain()) {
+     input_id <- paste(
+       c("overlap_end", object_one,
+         object_two %||% group),
+       collapse = "_"
+     )
+     js <- sprintf("addOverlapEnd('%s','%s','%s');",
+                   object_one, object_two, input_id)
+     session$sendCustomMessage("phaser", list(js = js))
+
+     shiny::observeEvent(input[[input_id]], {
+       evt <- input[[input_id]]
+       callback_fun(evt)
+     })
+   },
+
+   #' @description Register a callback fired when a specific key is pressed.
+   #' @param key A character, accepts Javascript key events (they need to align with
+   #'   event.code).
+   #' @param action A function to be run after key is pressed.
+   #' @param input Shiny input list.
+   add_control = function(key, action, input) {
+     event <- paste0(key, "_action")
+     js <- sprintf("addKeyControl('%s');", key)
+     send_js(private, js)
+     shiny::observeEvent(input[[event]], {
+       action()
+     })
+   }
+  ),
+  private = list(
+    config = list(),
+    input = NULL,
+    session = NULL
+  )
+)
+
+#' @title Text
+#' @description R6 class to represent a text object in the Phaser scene, allowing
+#'  dynamic updates to its content. Created with PhaserGame$add_text() method.
+#' @export
+Text <- R6::R6Class(
+  classname = "Text",
+  public = list(
+    #' @description Create a text object in the Phaser scene.
+    #' @param text Character. Text value to display.
+    #' @param id Character. Unique ID for the text object.
+    #' @param x Numeric. X-coordinate in pixels.
+    #' @param y Numeric. Y-coordinate in pixels.
+    #' @param style Named list. Styling options passed to Phaser text rendering.
+    #' @param session Shiny session object.
+    initialize = function(text, id, x, y, style, session = shiny::getDefaultReactiveDomain()) {
+      js <- sprintf("addText('%s', '%s', %d, %d, %s);",
+                    text, id, x, y, jsonlite::toJSON(style, auto_unbox = TRUE))
+      private$id <- id
+      private$session <- session
+      send_js(private, js)
+    },
+    #' @description Update the text content of this object.
+    #' @param text Character. New text value to display.
+    set = function(text) {
+      js <- sprintf("setText('%s', '%s');",
+                    text, private$id)
+      send_js(private, js)
+    }
+  ),
+  private = list(
+    id = NULL,
+    session = NULL
+  )
+)
