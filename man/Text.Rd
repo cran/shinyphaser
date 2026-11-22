@@ -7,11 +7,39 @@
 R6 class to represent a text object in the Phaser scene, allowing
 dynamic updates to its content. Created with PhaserGame$add_text() method.
 }
+\examples{
+
+## ------------------------------------------------
+## Method `Text$set_depth`
+## ------------------------------------------------
+
+\dontrun{
+background <- game$add_image(
+  "background", "assets/background.png", x = 400, y = 300
+)
+background$set_depth(-10)
+
+control <- game$add_rectangle(
+  "jump_control", x = 720, y = 540, width = 120, height = 48,
+  color = "0x223344"
+)
+control$set_depth(50)$set_scroll_factor(0)
+
+label <- game$add_text("Jump", "jump_label", x = 690, y = 528)
+label$set_depth(51)$set_scroll_factor(0)
+}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-Text-new}{\code{Text$new()}}
 \item \href{#method-Text-set}{\code{Text$set()}}
+\item \href{#method-Text-show}{\code{Text$show()}}
+\item \href{#method-Text-hide}{\code{Text$hide()}}
+\item \href{#method-Text-follow_camera}{\code{Text$follow_camera()}}
+\item \href{#method-Text-stop_camera_follow}{\code{Text$stop_camera_follow()}}
+\item \href{#method-Text-set_scroll_factor}{\code{Text$set_scroll_factor()}}
+\item \href{#method-Text-set_depth}{\code{Text$set_depth()}}
 \item \href{#method-Text-clone}{\code{Text$clone()}}
 }
 }
@@ -21,7 +49,15 @@ dynamic updates to its content. Created with PhaserGame$add_text() method.
 \subsection{Method \code{new()}}{
 Create a text object in the Phaser scene.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Text$new(text, id, x, y, style, session = shiny::getDefaultReactiveDomain())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Text$new(
+  text,
+  id,
+  x,
+  y,
+  style,
+  visible = TRUE,
+  session = shiny::getDefaultReactiveDomain()
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -36,6 +72,8 @@ Create a text object in the Phaser scene.
 \item{\code{y}}{Numeric. Y-coordinate in pixels.}
 
 \item{\code{style}}{Named list. Styling options passed to Phaser text rendering.}
+
+\item{\code{visible}}{Logical. Whether text is initially visible.}
 
 \item{\code{session}}{Shiny session object.}
 }
@@ -58,6 +96,126 @@ Update the text content of this object.
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Text-show"></a>}}
+\if{latex}{\out{\hypertarget{method-Text-show}{}}}
+\subsection{Method \code{show()}}{
+Show a previously added text object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Text$show()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Text-hide"></a>}}
+\if{latex}{\out{\hypertarget{method-Text-hide}{}}}
+\subsection{Method \code{hide()}}{
+Hide a previously added text object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Text$hide()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Text-follow_camera"></a>}}
+\if{latex}{\out{\hypertarget{method-Text-follow_camera}{}}}
+\subsection{Method \code{follow_camera()}}{
+Make the camera follow this text object as it moves through the world.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Text$follow_camera(lerp_x = 1, lerp_y = 1, round_pixels = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{lerp_x}}{Numeric. Horizontal interpolation factor from 0 to 1 (default: 1).}
+
+\item{\code{lerp_y}}{Numeric. Vertical interpolation factor from 0 to 1 (default: 1).}
+
+\item{\code{round_pixels}}{Logical. Whether to round camera pixels to avoid sub-pixel rendering (default: TRUE).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Text-stop_camera_follow"></a>}}
+\if{latex}{\out{\hypertarget{method-Text-stop_camera_follow}{}}}
+\subsection{Method \code{stop_camera_follow()}}{
+Stop the camera from following this text object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Text$stop_camera_follow()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Text-set_scroll_factor"></a>}}
+\if{latex}{\out{\hypertarget{method-Text-set_scroll_factor}{}}}
+\subsection{Method \code{set_scroll_factor()}}{
+Set how much this text object scrolls with the camera.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Text$set_scroll_factor(x, y = x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Numeric. Horizontal scroll factor (0 = fixed to viewport, 1 = scrolls with world).}
+
+\item{\code{y}}{Numeric. Vertical scroll factor. Defaults to \code{x}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Text-set_depth"></a>}}
+\if{latex}{\out{\hypertarget{method-Text-set_depth}{}}}
+\subsection{Method \code{set_depth()}}{
+Set the text object's rendering depth. Objects with a
+larger depth are rendered in front of objects with a smaller depth.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Text$set_depth(depth)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{depth}}{Numeric. Phaser rendering depth.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Every individually renderable object wrapper supports
+\code{set_depth()}. Larger values draw in front of smaller values. The
+method invisibly returns its object, so it can be chained with other
+object methods.
+}
+
+\subsection{Returns}{
+This text object, invisibly, to support method chaining.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+background <- game$add_image(
+  "background", "assets/background.png", x = 400, y = 300
+)
+background$set_depth(-10)
+
+control <- game$add_rectangle(
+  "jump_control", x = 720, y = 540, width = 120, height = 48,
+  color = "0x223344"
+)
+control$set_depth(50)$set_scroll_factor(0)
+
+label <- game$add_text("Jump", "jump_label", x = 690, y = 528)
+label$set_depth(51)$set_scroll_factor(0)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Text-clone"></a>}}

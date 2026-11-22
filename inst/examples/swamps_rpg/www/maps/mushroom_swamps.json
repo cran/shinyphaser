@@ -1,0 +1,689 @@
+{
+  "compressionlevel": -1,
+  "height": 12,
+  "infinite": false,
+  "layers": [
+    {
+      "data": [
+        20,
+        1,
+        1,
+        1,
+        1,
+        1,
+        20,
+        1,
+        1,
+        1,
+        1,
+        1,
+        20,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        20,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        18,
+        18,
+        1,
+        18,
+        18,
+        1,
+        21,
+        1,
+        1,
+        20,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        18,
+        18,
+        18,
+        1,
+        18,
+        1,
+        1,
+        18,
+        1,
+        21,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        18,
+        18,
+        18,
+        18,
+        1,
+        18,
+        1,
+        19,
+        1,
+        18,
+        1,
+        20,
+        1,
+        1,
+        1,
+        20,
+        1,
+        21,
+        1,
+        21,
+        1,
+        19,
+        10,
+        13,
+        12,
+        19,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        20,
+        1,
+        1,
+        1,
+        18,
+        1,
+        6,
+        3,
+        4,
+        19,
+        1,
+        1,
+        21,
+        1,
+        1,
+        1,
+        1,
+        18,
+        1,
+        18,
+        21,
+        1,
+        19,
+        19,
+        18,
+        18,
+        18,
+        18,
+        18,
+        20,
+        1,
+        1,
+        1,
+        19,
+        19,
+        19,
+        1,
+        1,
+        18,
+        18,
+        18,
+        18,
+        18,
+        1,
+        18,
+        1,
+        1,
+        1,
+        19,
+        10,
+        13,
+        12,
+        19,
+        18,
+        1,
+        1,
+        18,
+        18,
+        18,
+        18,
+        1,
+        1,
+        21,
+        1,
+        1,
+        6,
+        3,
+        4,
+        19,
+        18,
+        20,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        21,
+        1,
+        1,
+        18,
+        19,
+        19,
+        19,
+        18,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "height": 12,
+      "id": 1,
+      "name": "terrain",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 16,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 2,
+  "nextobjectid": 1,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.2",
+  "tileheight": 100,
+  "tilesets": [
+    {
+      "columns": 1,
+      "firstgid": 1,
+      "image": "../terrain/mushroom_swamps/mushroom_swamps_grass_1.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_grass_1",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100
+    },
+    {
+      "columns": 1,
+      "firstgid": 2,
+      "image": "../terrain/mushroom_swamps/mushroom_swamps_swamp_1.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_1",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 3,
+      "image": "../terrain/mushroom_swamps/ms_bank_bottom.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_bottom",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 4,
+      "image": "../terrain/mushroom_swamps/ms_bank_bottom_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_bottom_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 5,
+      "image": "../terrain/mushroom_swamps/ms_bank_left.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_left",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 6,
+      "image": "../terrain/mushroom_swamps/ms_bank_left_bottom.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_left_bottom",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 7,
+      "image": "../terrain/mushroom_swamps/ms_bank_left_bottom_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_left_bottom_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 8,
+      "image": "../terrain/mushroom_swamps/ms_bank_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 9,
+      "image": "../terrain/mushroom_swamps/ms_bank_top_bottom_left_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top_bottom_left_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 10,
+      "image": "../terrain/mushroom_swamps/ms_bank_top_left.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top_left",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 11,
+      "image": "../terrain/mushroom_swamps/ms_bank_top_left_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top_left_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 12,
+      "image": "../terrain/mushroom_swamps/ms_bank_top_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 13,
+      "image": "../terrain/mushroom_swamps/ms_bank_top.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 14,
+      "image": "../terrain/mushroom_swamps/ms_bank_top_bottom.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top_bottom",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 15,
+      "image": "../terrain/mushroom_swamps/ms_bank_top_bottom_left.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top_bottom_left",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 16,
+      "image": "../terrain/mushroom_swamps/ms_bank_top_bottom_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_top_bottom_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 17,
+      "image": "../terrain/mushroom_swamps/ms_bank_left_right.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_swamp_bank_left_right",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100,
+      "tiles": [
+        {
+          "id": 0,
+          "properties": [
+            {
+              "name": "collides",
+              "type": "bool",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "columns": 1,
+      "firstgid": 18,
+      "image": "../terrain/mushroom_swamps/mushroom_swamps_grass_2.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_grass_2",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100
+    },
+    {
+      "columns": 1,
+      "firstgid": 19,
+      "image": "../terrain/mushroom_swamps/mushroom_swamps_grass_3.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_grass_3",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100
+    },
+    {
+      "columns": 1,
+      "firstgid": 20,
+      "image": "../terrain/mushroom_swamps/mushroom_swamps_grass_4.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_grass_4",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100
+    },
+    {
+      "columns": 1,
+      "firstgid": 21,
+      "image": "../terrain/mushroom_swamps/mushroom_swamps_grass_5.png",
+      "imageheight": 100,
+      "imagewidth": 100,
+      "margin": 0,
+      "name": "mushroom_swamps_grass_5",
+      "spacing": 0,
+      "tilecount": 1,
+      "tileheight": 100,
+      "tilewidth": 100
+    }
+  ],
+  "tilewidth": 100,
+  "type": "map",
+  "version": "1.10",
+  "width": 16
+}

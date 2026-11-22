@@ -2,7 +2,7 @@
 #'
 #' @title PhaserGame
 #' @description R6 class to create and manage a Phaser game within a Shiny application.
-#' Provides methods for adding sprites, animations, images, backgrounds, controls, and collision handling.
+#' Provides methods for adding sprites, animations, images, sounds, backgrounds, controls, and collision handling.
 #'
 #' @export
 PhaserGame <- R6::R6Class(
@@ -15,17 +15,23 @@ PhaserGame <- R6::R6Class(
     #' @param id Character. ID of the Game container (defaults to "phaser_game").
     #' @param width Numeric. Width of the Phaser canvas in pixels (defaults to 800).
     #' @param height Numeric. Height of the Phaser canvas in pixels (defaults to 600).
+    #' @param gravity_x Numeric. Horizontal Arcade Physics world gravity (defaults to 0).
+    #' @param gravity_y Numeric. Vertical Arcade Physics world gravity (defaults to 0).
     #' @return A new PhaserGame object.
     #' @examples
     #' game <- PhaserGame$new(id = "my_game", width = 1024, height = 768)
     initialize = function(id = "phaser_game",
                           width = 800,
-                          height = 600) {
+                          height = 600,
+                          gravity_x = 0,
+                          gravity_y = 0) {
       self$id <- id
 
       private$config <- list(
         width = width,
-        height = height
+        height = height,
+        gravity_x = gravity_x,
+        gravity_y = gravity_y
       )
     },
 
@@ -33,6 +39,77 @@ PhaserGame <- R6::R6Class(
     #' @param session Shiny session object (default: shiny::getDefaultReactiveDomain()).
     set_shiny_session = function(session = shiny::getDefaultReactiveDomain()) {
       private$session <- session
+      private$register_save_handler()
+    },
+
+    #' @description Save game data and Phaser object state to a JSON file on the
+    #'   server. Positions are read directly from Phaser immediately before the
+    #'   save request, avoiding stale Shiny coordinates.
+    #' @param name Character. Human-readable name of the save.
+    #' @param state Named list. Additional JSON-serializable application state.
+    #' @param objects Character vector. Named Phaser scene objects to capture. By
+    #'   default all named scene objects are captured.
+    #' @param snapshot Named list. Optional Phaser object snapshot already
+    #'   captured in the browser. Supplying it writes the save synchronously.
+    #' @param directory Character. Server-side directory. Defaults to a
+    #'   game-specific folder below [tempdir()].
+    #' @return Invisible request identifier. The disk write completes
+    #'   asynchronously after Phaser returns its snapshot.
+    save_game = function(name, state = list(), objects = NULL, snapshot = NULL,
+                         directory = NULL) {
+      private$set_save_directory(directory)
+      private$register_save_handler()
+      name <- trimws(as.character(name)[1])
+      if (!nzchar(name)) stop("name must not be empty.", call. = FALSE)
+      if (!is.null(snapshot)) {
+        record <- private$write_save(name, state, snapshot)
+        if (!is.null(private$session)) {
+          private$session$sendCustomMessage("phaser-save-complete", record)
+        }
+        return(invisible(record))
+      }
+      if (is.null(private$save_observer)) {
+        stop("A Shiny session must be set before save_game() is called.", call. = FALSE)
+      }
+      request_id <- paste0(as.integer(Sys.time()), "-", sample.int(1e9, 1))
+      js <- sprintf(
+        "capturePhaserGameState(%s, %s, %s, %s);",
+        jsonlite::toJSON(private$save_input_id, auto_unbox = TRUE),
+        jsonlite::toJSON(request_id, auto_unbox = TRUE),
+        jsonlite::toJSON(name, auto_unbox = TRUE),
+        jsonlite::toJSON(list(state = state, objects = objects), auto_unbox = TRUE, null = "null")
+      )
+      send_js(private, js)
+      invisible(request_id)
+    },
+
+    #' @description List saves stored on the server for this game.
+    #' @param directory Character. Server-side save directory.
+    #' @return A list of saved game records, newest first.
+    list_saved_games = function(directory = NULL) {
+      private$set_save_directory(directory)
+      saves <- read_phaser_saves(private$save_file)
+      if (!length(saves)) return(saves)
+      saves[order(vapply(saves, function(x) x$savedAt %||% "", character(1)), decreasing = TRUE)]
+    },
+
+    #' @description Load a saved game from server disk.
+    #' @param name Character. Save name.
+    #' @param restore Logical. Restore captured Phaser object properties.
+    #' @param directory Character. Server-side save directory.
+    #' @return The additional application state stored with the save, invisibly.
+    load_game = function(name, restore = TRUE, directory = NULL) {
+      saves <- self$list_saved_games(directory)
+      matches <- which(vapply(saves, function(x) identical(x$name, as.character(name)[1]), logical(1)))
+      if (!length(matches)) stop(sprintf("Saved game '%s' was not found.", name), call. = FALSE)
+      save <- saves[[matches[1]]]
+      if (isTRUE(restore)) {
+        send_js(private, sprintf("restorePhaserGameState(%s);",
+          jsonlite::toJSON(save$phaser, auto_unbox = TRUE, null = "null")))
+      }
+      state <- save$state %||% list()
+      state$phaser <- save$phaser %||% list(objects = list())
+      invisible(state)
     },
 
     #' @description Load dependencies and initialize the Phaser game in the UI.
@@ -40,7 +117,6 @@ PhaserGame <- R6::R6Class(
     #' @examples
     #'  game$use_phaser()
     use_phaser = function() {
-      shiny::addResourcePath("assets", system.file("assets", package = "shinyphaser"))
       htmltools::tagList(
         phaser_dependency(),
         htmltools::tags$div(id = self$id, style = "width:100vw; height:100vh;"),
@@ -65,8 +141,12 @@ PhaserGame <- R6::R6Class(
     #' @param x Numeric. X-coordinate in pixels.
     #' @param y Numeric. Y-coordinate in pixels.
     #' @param style Named list. Styling options passed to Phaser text rendering.
-    add_text = function(text, id, x, y, style = list(font_size = '22px')) {
-      return(Text$new(text, id, x, y, style))
+    #' @param visible Logical. Whether text is initially visible.
+    add_text = function(text, id, x, y, style = list(font_size = '22px'), visible = TRUE) {
+      return(Text$new(
+        text, id, x, y, style, visible,
+        session = private$session %||% shiny::getDefaultReactiveDomain()
+      ))
     },
 
     #' @description Add a rectangle object to the Phaser scene.
@@ -93,6 +173,33 @@ PhaserGame <- R6::R6Class(
       return(Image$new(name, url, x, y, visible, clickable))
     },
 
+    #' @description Adds a sound to the Phaser scene.
+    #' @param name Character. Unique key to reference this sound.
+    #' @param url Character. URL or path to the audio file.
+    #' @param volume Numeric. Initial playback volume from 0 to 1 (default: 1).
+    #' @param loop Logical. Whether the sound should loop by default (default: FALSE).
+    add_sound = function(name, url, volume = 1, loop = FALSE) {
+      return(Sound$new(
+        name, url, volume, loop,
+        session = private$session %||% shiny::getDefaultReactiveDomain()
+      ))
+    },
+
+    #' @description Create browser-resident state for use in browser actions.
+    #' @param key Character. Unique state key.
+    #' @param initial Initial JSON-serializable value.
+    add_state = function(key, initial = NULL) {
+      send_js(private, sprintf("setBrowserState(%s, %s);",
+        jsonlite::toJSON(key, auto_unbox = TRUE),
+        jsonlite::toJSON(initial, auto_unbox = TRUE, null = "null")))
+      BrowserState$new(key)
+    },
+
+    #' @description Create a browser-resident cooldown for browser-action conditions.
+    #' @param key Character. Unique cooldown key.
+    #' @param duration Numeric. Cooldown duration in milliseconds.
+    add_cooldown = function(key, duration) BrowserCooldown$new(key, duration),
+
     #' @description Add a background (tilemap) layer from Tiled JSON + tileset image(s).
     #' @param map_key Character. Key for the tilemap JSON.
     #' @param map_url Character. URL of the Tiled JSON file (relative to www/assets/).
@@ -116,6 +223,63 @@ PhaserGame <- R6::R6Class(
       send_js(private, js)
     },
 
+    #' @description Activate a tilemap previously loaded with `add_map()`.
+    #' @param map_key Character. Key of the tilemap to activate.
+    #' @param player_name Character. Optional player sprite to reposition.
+    #' @param x Numeric. Optional player x-coordinate.
+    #' @param y Numeric. Optional player y-coordinate.
+    #' @param visible_objects Character vector. Scene objects to show and enable.
+    #' @param hidden_objects Character vector. Scene objects to hide and disable.
+    #' @return Invisible; sends a custom message to the client.
+    activate_map = function(map_key, player_name = NULL, x = NULL, y = NULL,
+                            visible_objects = character(), hidden_objects = character()) {
+      js_value <- function(value) jsonlite::toJSON(value, auto_unbox = TRUE, null = "null")
+      js_array <- function(value) jsonlite::toJSON(value, auto_unbox = FALSE, null = "null")
+      js <- sprintf(
+        "activateMap(%s, %s, %s, %s, %s, %s);",
+        js_value(map_key), js_value(player_name), js_value(x), js_value(y),
+        js_array(visible_objects), js_array(hidden_objects)
+      )
+      send_js(private, js)
+    },
+
+    #' @description Add a trigger that monitors when a scene object is near a point.
+    #' @param id Character. Unique trigger identifier.
+    #' @param object_name Character. Scene object whose position is monitored.
+    #' @param x Numeric. Target x-coordinate.
+    #' @param y Numeric. Target y-coordinate.
+    #' @param radius Numeric. Maximum distance at which the trigger is active.
+    #' @param element_id Character or `NULL`. ID of an HTML element to show while
+    #'   the trigger is active.
+    #' @param context Character or `NULL`. Optional map key that must be active for
+    #'   the trigger to be evaluated.
+    #' @param input_id Character or `NULL`. Optional Shiny input that receives a
+    #'   payload whenever the trigger is entered or exited.
+    #' @return Invisible; sends a custom message to the client.
+    add_proximity_trigger = function(id, object_name, x, y, radius = 180,
+                                     element_id = NULL, context = NULL,
+                                     input_id = NULL) {
+      js <- sprintf(
+        "addProximityTrigger(%s, %s, %f, %f, %f, %s, %s, %s);",
+        jsonlite::toJSON(id, auto_unbox = TRUE),
+        jsonlite::toJSON(object_name, auto_unbox = TRUE),
+        x, y, radius,
+        jsonlite::toJSON(element_id, auto_unbox = TRUE, null = "null"),
+        jsonlite::toJSON(context, auto_unbox = TRUE, null = "null"),
+        jsonlite::toJSON(input_id, auto_unbox = TRUE, null = "null")
+      )
+      send_js(private, js)
+    },
+
+    #' @description Set the Phaser physics world and camera bounds.
+    #' @param width Numeric. World width in pixels.
+    #' @param height Numeric. World height in pixels.
+    #' @return Invisible; sends a custom message to the client.
+    set_world_bounds = function(width, height) {
+      js <- sprintf("setWorldBounds(%d, %d);", width, height)
+      send_js(private, js)
+    },
+
     #' @description Enable terrain collision for a player sprite.
     #' @param name Character. Name of the player sprite (as added via add_player_sprite).
     enable_terrain_collision = function(name) {
@@ -136,13 +300,32 @@ PhaserGame <- R6::R6Class(
                           x, y,
                           frame_width, frame_height,
                           frame_count = 1, frame_rate = 1) {
-      return(Sprite$new(name, url, x, y, frame_width, frame_height, frame_count, frame_rate))
+      return(Sprite$new(
+        name, url, x, y, frame_width, frame_height, frame_count, frame_rate,
+        session = private$session %||% shiny::getDefaultReactiveDomain()
+      ))
+    },
+
+    #' @description Add an invisible static collision rectangle to the world.
+    #' @param name Character. Unique name of the collision rectangle.
+    #' @param x Numeric. X-coordinate of its center.
+    #' @param y Numeric. Y-coordinate of its center.
+    #' @param width Numeric. Collision width in pixels.
+    #' @param height Numeric. Collision height in pixels.
+    add_collision_rectangle = function(name, x, y, width, height) {
+      send_js(private, sprintf(
+        "addCollisionRectangle(%s, %f, %f, %f, %f);",
+        jsonlite::toJSON(name, auto_unbox = TRUE), x, y, width, height
+      ))
     },
 
     #' @description Adds a dynamic group from a spritesheet.
     #' @param name Character. Unique name of the group.
     add_group = function(name) {
-      return(Group$new(name))
+      return(Group$new(
+        name,
+        session = private$session %||% shiny::getDefaultReactiveDomain()
+      ))
    },
 
     #' @description Adds a static sprite to the scene (non-animated).
@@ -151,7 +334,10 @@ PhaserGame <- R6::R6Class(
     #' @param x Numeric. X-coordinate in pixels.
     #' @param y Numeric. Y-coordinate in pixels.
     add_static_sprite = function(name, url, x, y) {
-      return(StaticSprite$new(name, url, x, y))
+      return(StaticSprite$new(
+        name, url, x, y,
+        session = private$session %||% shiny::getDefaultReactiveDomain()
+      ))
     },
 
     #' @description Adds a static group to the scene (non-animated).
@@ -160,7 +346,8 @@ PhaserGame <- R6::R6Class(
     add_static_group = function(name, url) {
       return(StaticGroup$new(
         name = name,
-        url = url
+        url = url,
+        session = private$session %||% shiny::getDefaultReactiveDomain()
       ))
     },
 
@@ -168,66 +355,87 @@ PhaserGame <- R6::R6Class(
     #' @param object_one Character. Name of the first object.
     #' @param object_two Character. Name of the second object.
     #' @param group Character. Name of the group to compare against.
-    #' @param callback_fun A function to be run when collision occurs.
+    #' @param browser_action Actions created with [browser_actions()] that run
+    #'   immediately in the browser.
     #' @param input Shiny input list.
+    #' @param server_action Function called in R with the collision event.
     add_collider = function(object_one,
                             object_two = NULL,
                             group = NULL,
-                            callback_fun = NULL,
-                            input) {
+                            browser_action = browser_actions(),
+                            input = NULL,
+                            server_action = NULL) {
+      browser_spec <- compile_browser_actions(substitute(browser_action), parent.frame())
       input_id <- paste(
         c("collide", object_one,
           object_two %||% group),
         collapse = "_"
       )
 
+      event_target <- if (!is.null(server_action)) input_id else NULL
+      register_server_action(input, input_id, server_action)
+
       js <- if (!is.null(object_two)) {
-        sprintf("addCollider('%s','%s','%s')",
-                object_one, object_two, input_id)
+        sprintf("addCollider('%s','%s',%s,%s)",
+                object_one, object_two,
+                phaser_event_target_json(event_target),
+                jsonlite::toJSON(browser_spec, auto_unbox = TRUE, null = "null"))
       } else {
-        sprintf("addGroupCollider('%s','%s','%s')",
-                object_one, group, input_id)
+        sprintf("addGroupCollider('%s','%s',%s,%s)",
+                object_one, group,
+                phaser_event_target_json(event_target),
+                jsonlite::toJSON(browser_spec, auto_unbox = TRUE, null = "null"))
       }
       send_js(private, js)
-      if (!is.null(callback_fun)) {
-        shiny::observeEvent(input[[input_id]], {
-          evt <- input[[input_id]]
-          callback_fun(evt)
-        }, ignoreNULL = TRUE)
-      }
     },
 
     #' @description Adds a collider between two game objects.
     #' @param object_one Character. Name of the first object.
     #' @param object_two Character. Name of the second object.
     #' @param group Character. Name of the group.
-    #' @param callback_fun A function to be run when overlap occurs.
+    #' @param browser_action Actions created with [browser_actions()] that run
+    #'   immediately in the browser.
     #' @param input Shiny input list.
+    #' @param server_action Function called in R with the overlap event.
+    #' @param mode Character. `"enter"` (default) runs once per contact;
+    #'   `"stay"` repeats while overlapping.
+    #' @param interval Numeric. Minimum milliseconds between `"stay"` actions.
     add_overlap = function(object_one,
                            object_two = NULL,
                            group = NULL,
-                           callback_fun,
-                           input) {
-      Sys.sleep(0.1)
+                           browser_action = browser_actions(),
+                           input = NULL,
+                           server_action = NULL,
+                           mode = c("enter", "stay"),
+                           interval = 0) {
+      browser_spec <- compile_browser_actions(substitute(browser_action), parent.frame())
+      mode <- match.arg(mode)
+
       input_id <- paste(
         c("overlap", object_one,
           object_two %||% group),
         collapse = "_"
       )
 
+      event_endpoint <- if (!is.null(server_action)) input_id else NULL
+      register_server_action(input, input_id, server_action)
+
       js <- if (!is.null(object_two)) {
-        sprintf("addOverlap('%s','%s','%s')",
-                object_one, object_two, input_id)
+        sprintf("addOverlap(%s, %s, %s, %s, %s, %s)",
+                jsonlite::toJSON(object_one, auto_unbox = TRUE),
+                jsonlite::toJSON(object_two, auto_unbox = TRUE),
+                phaser_event_target_json(event_endpoint),
+                jsonlite::toJSON(browser_spec, auto_unbox = TRUE, null = "null"),
+                jsonlite::toJSON(mode, auto_unbox = TRUE), interval)
       } else {
-        sprintf("addGroupOverlap('%s','%s','%s')",
-                object_one, group, input_id)
+        sprintf("addGroupOverlap(%s, %s, %s, %s, %s, %s)",
+                jsonlite::toJSON(object_one, auto_unbox = TRUE),
+                jsonlite::toJSON(group, auto_unbox = TRUE),
+                phaser_event_target_json(event_endpoint),
+                jsonlite::toJSON(browser_spec, auto_unbox = TRUE, null = "null"),
+                jsonlite::toJSON(mode, auto_unbox = TRUE), interval)
       }
       send_js(private, js)
-
-      shiny::observeEvent(input[[input_id]], {
-        evt <- input[[input_id]]
-        callback_fun(evt)
-      }, ignoreNULL = TRUE)
     },
 
    #' @description Create a reactive expression for overlap state between two objects.
@@ -254,48 +462,98 @@ PhaserGame <- R6::R6Class(
    #' @param object_one Character. Name of the first object.
    #' @param object_two Character. Name of the second object.
    #' @param group Character. Name of the group to compare against.
-   #' @param callback_fun Function. Callback executed when overlap ends.
+   #' @param browser_action Actions created with [browser_actions()] that run
+   #'   immediately in the browser.
    #' @param input Shiny input list.
+   #' @param server_action Function called in R with the overlap-end event.
    #' @param session Shiny session object.
    add_overlap_end = function(object_one,
                               object_two = NULL,
                               group = NULL,
-                              callback_fun,
-                              input,
+                              browser_action = browser_actions(),
+                              input = NULL,
+                              server_action = NULL,
                               session = shiny::getDefaultReactiveDomain()) {
+     browser_spec <- compile_browser_actions(substitute(browser_action), parent.frame())
+
      input_id <- paste(
        c("overlap_end", object_one,
          object_two %||% group),
        collapse = "_"
      )
-     js <- sprintf("addOverlapEnd('%s','%s','%s');",
-                   object_one, object_two, input_id)
+     event_endpoint <- if (!is.null(server_action)) input_id else NULL
+     register_server_action(input, input_id, server_action)
+     js <- sprintf("addOverlapEnd(%s, %s, %s, %s);",
+                   jsonlite::toJSON(object_one, auto_unbox = TRUE),
+                   jsonlite::toJSON(object_two, auto_unbox = TRUE),
+                   phaser_event_target_json(event_endpoint),
+                   jsonlite::toJSON(browser_spec, auto_unbox = TRUE, null = "null"))
      session$sendCustomMessage("phaser", list(js = js))
-
-     shiny::observeEvent(input[[input_id]], {
-       evt <- input[[input_id]]
-       callback_fun(evt)
-     })
    },
 
    #' @description Register a callback fired when a specific key is pressed.
    #' @param key A character, accepts Javascript key events (they need to align with
    #'   event.code).
-   #' @param action A function to be run after key is pressed.
+   #' @param browser_action Actions created with [browser_actions()] that run
+   #'   immediately in the browser.
    #' @param input Shiny input list.
-   add_control = function(key, action, input) {
-     event <- paste0(key, "_action")
-     js <- sprintf("addKeyControl('%s');", key)
+   #' @param server_action Function called in R with the keyboard event.
+   add_control = function(key,
+                          browser_action = browser_actions(),
+                          input = NULL,
+                          server_action = NULL) {
+     browser_spec <- compile_browser_actions(substitute(browser_action), parent.frame())
+     register_server_action(input, paste0(key, "_action"), server_action)
+     js <- sprintf(
+       "addKeyControl(%s, %s, %s);",
+       jsonlite::toJSON(key, auto_unbox = TRUE),
+       jsonlite::toJSON(browser_spec, auto_unbox = TRUE, null = "null"),
+       tolower(!is.null(server_action))
+     )
      send_js(private, js)
-     shiny::observeEvent(input[[event]], {
-       action()
-     })
    }
   ),
   private = list(
     config = list(),
     input = NULL,
-    session = NULL
+    session = NULL,
+    save_directory = NULL,
+    save_file = NULL,
+    save_input_id = NULL,
+    save_observer = NULL,
+    write_save = function(name, state, objects) {
+      saves <- read_phaser_saves(private$save_file)
+      record <- list(
+        name = as.character(name),
+        savedAt = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC"),
+        state = state %||% list(),
+        phaser = list(objects = objects %||% list())
+      )
+      keep <- !vapply(saves, function(x) identical(x$name, record$name), logical(1))
+      write_phaser_saves(c(saves[keep], list(record)), private$save_file)
+      record
+    },
+    set_save_directory = function(directory = NULL) {
+      if (!is.null(directory)) private$save_directory <- normalizePath(directory, mustWork = FALSE)
+      if (is.null(private$save_directory)) {
+        private$save_directory <- file.path(tempdir(), "shinyphaser", self$id)
+      }
+      dir.create(private$save_directory, recursive = TRUE, showWarnings = FALSE)
+      private$save_file <- file.path(private$save_directory, "save-games.json")
+    },
+    register_save_handler = function() {
+      if (!is.null(private$save_observer) || is.null(private$session) ||
+          is.null(private$session$input)) return(invisible(NULL))
+      private$save_input_id <- paste0(self$id, "_save_game_state")
+      private$set_save_directory()
+      private$save_observer <- shiny::observeEvent(
+        private$session$input[[private$save_input_id]], {
+          request <- private$session$input[[private$save_input_id]]
+          record <- private$write_save(request$name, request$state, request$objects)
+          private$session$sendCustomMessage("phaser-save-complete", record)
+        }, ignoreInit = TRUE
+      )
+    }
   )
 )
 
@@ -312,10 +570,13 @@ Text <- R6::R6Class(
     #' @param x Numeric. X-coordinate in pixels.
     #' @param y Numeric. Y-coordinate in pixels.
     #' @param style Named list. Styling options passed to Phaser text rendering.
+    #' @param visible Logical. Whether text is initially visible.
     #' @param session Shiny session object.
-    initialize = function(text, id, x, y, style, session = shiny::getDefaultReactiveDomain()) {
-      js <- sprintf("addText('%s', '%s', %d, %d, %s);",
-                    text, id, x, y, jsonlite::toJSON(style, auto_unbox = TRUE))
+    initialize = function(text, id, x, y, style, visible = TRUE,
+                          session = shiny::getDefaultReactiveDomain()) {
+      js <- sprintf("addText('%s', '%s', %d, %d, %s, %s);",
+                    text, id, x, y, jsonlite::toJSON(style, auto_unbox = TRUE),
+                    tolower(visible))
       private$id <- id
       private$session <- session
       send_js(private, js)
@@ -326,6 +587,70 @@ Text <- R6::R6Class(
       js <- sprintf("setText('%s', '%s');",
                     text, private$id)
       send_js(private, js)
+    },
+    #' @description Show a previously added text object.
+    show = function() {
+      js <- sprintf("showText('%s');", private$id)
+      send_js(private, js)
+    },
+    #' @description Hide a previously added text object.
+    hide = function() {
+      js <- sprintf("hideText('%s');", private$id)
+      send_js(private, js)
+    },
+    #' @description Make the camera follow this text object as it moves through the world.
+    #' @param lerp_x Numeric. Horizontal interpolation factor from 0 to 1 (default: 1).
+    #' @param lerp_y Numeric. Vertical interpolation factor from 0 to 1 (default: 1).
+    #' @param round_pixels Logical. Whether to round camera pixels to avoid sub-pixel rendering (default: TRUE).
+    follow_camera = function(lerp_x = 1,
+                             lerp_y = 1,
+                             round_pixels = TRUE) {
+      js <- sprintf(
+        "followSpriteWithCamera('%s', %f, %f, %s);",
+        private$id, lerp_x, lerp_y, tolower(round_pixels)
+      )
+      send_js(private, js)
+    },
+    #' @description Stop the camera from following this text object.
+    stop_camera_follow = function() {
+      js <- sprintf("stopCameraFollow('%s');", private$id)
+      send_js(private, js)
+    },
+    #' @description Set how much this text object scrolls with the camera.
+    #' @param x Numeric. Horizontal scroll factor (0 = fixed to viewport, 1 = scrolls with world).
+    #' @param y Numeric. Vertical scroll factor. Defaults to `x`.
+    set_scroll_factor = function(x, y = x) {
+      js <- sprintf("setScrollFactor('%s', %f, %f);", private$id, x, y)
+      send_js(private, js)
+    },
+    #' @description Set the text object's rendering depth. Objects with a
+    #'   larger depth are rendered in front of objects with a smaller depth.
+    #' @param depth Numeric. Phaser rendering depth.
+    #' @return This text object, invisibly, to support method chaining.
+    #' @details Every individually renderable object wrapper supports
+    #'   `set_depth()`. Larger values draw in front of smaller values. The
+    #'   method invisibly returns its object, so it can be chained with other
+    #'   object methods.
+    #' @examples
+    #' \dontrun{
+    #' background <- game$add_image(
+    #'   "background", "assets/background.png", x = 400, y = 300
+    #' )
+    #' background$set_depth(-10)
+    #'
+    #' control <- game$add_rectangle(
+    #'   "jump_control", x = 720, y = 540, width = 120, height = 48,
+    #'   color = "0x223344"
+    #' )
+    #' control$set_depth(50)$set_scroll_factor(0)
+    #'
+    #' label <- game$add_text("Jump", "jump_label", x = 690, y = 528)
+    #' label$set_depth(51)$set_scroll_factor(0)
+    #' }
+    set_depth = function(depth) {
+      js <- sprintf("setSpriteDepth('%s', %f);", private$id, depth)
+      send_js(private, js)
+      invisible(self)
     }
   ),
   private = list(

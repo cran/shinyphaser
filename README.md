@@ -6,10 +6,16 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/maciekbanas/shinyphaser/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/maciekbanas/shinyphaser/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/shinyphaser)](https://CRAN.R-project.org/package=shinyphaser)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/shinyphaser)](https://cran.r-project.org/package=shinyphaser)
 <!-- badges: end -->
 
 This package provides an R Shiny interface to selected features of the
 [Phaser 3](https://phaser.io/) game framework.
+
+![](man/figures/geometry_dash_example.gif)<!-- -->
 
 ## What you can do with shinyphaser
 
@@ -37,13 +43,27 @@ Install the development version from GitHub:
 pak::pak("maciekbanas/shinyphaser")
 ```
 
-## Quick start
+## API scope
 
-You can run the built-in sample app:
+`shinyphaser` is intentionally more than a one-to-one translation of the
+Phaser API. Alongside wrappers for scene objects and physics operations,
+it includes reusable, browser-side behaviours when they remove
+substantial Shiny round trips and are useful across game genres. For
+example, `Sprite$start_approach_on_sight()` can drive guards, animals,
+vehicles, or simulation agents.
 
-``` r
-shinyphaser::run_sample_app()
-```
+Higher-level helpers belong in the package when they:
+
+- operate on generic Phaser concepts rather than an example’s story or
+  rules,
+- need browser-speed updates that would be inefficient through the Shiny
+  server, and
+- remain composable with lower-level methods such as `set_in_motion()`
+  and `stop_motion()`.
+
+Example-specific quests, combat rules, dialogue, and map progression
+remain in example applications. This keeps the core API broadly useful
+without limiting it to thin Phaser bindings.
 
 ## Learn by example
 
@@ -51,6 +71,36 @@ For a full walkthrough (from static background to movement, animation,
 overlap, and collision), see [**Build your first shinyphaser
 game**](https://maciekbanas.github.io/shinyphaser/articles/first-game.html)
 
+For a simple runner with gravity, jumping, and obstacles, see [**Build a
+Geometry Dash-style
+runner**](https://maciekbanas.github.io/shinyphaser/articles/geometry-dash.html).
+
+![](man/figures/hedgehog_example.gif)<!-- -->
+
 ## Example games created with `shinyphaser`
 
-- [hedgehog](https://maciekbanas.shinyapps.io/hedgehog)
+Three games are included in `inst/examples`, each with its own assets:
+
+- **Hedgehog**: collect apples, avoid enemies, and progress through
+  three levels. [Play
+  online](https://maciekbanas.shinyapps.io/hedgehog).
+- **Geometry Dash**: jump over spikes in a one-button runner and reach
+  the finish.
+- **Swamps RPG**: face mushrooms and skeletons, enter a crypt, and rescue the spirit inside to win;
+  try combat, scenery collision, map switching, sound, and saving.
+
+With the current development version of shinyphaser installed, run each
+game from the repository root:
+
+``` r
+shiny::runApp("inst/examples/hedgehog")
+shiny::runApp("inst/examples/geometry_dash")
+shiny::runApp("inst/examples/swamps_rpg")
+```
+
+## Development
+
+shinyphaser is developed largely with the assistance of OpenAI Codex, under
+human direction and oversight. AI assists with implementation, documentation,
+and tests; the maintainer makes the final decisions and remains responsible
+for the package.

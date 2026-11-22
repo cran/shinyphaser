@@ -33,6 +33,40 @@ Rectangle <- R6::R6Class(
       js <- sprintf("hideImage('%s');", private$name)
       send_js(private, js)
     },
+    #' @description Make the camera follow this rectangle as it moves through the world.
+    #' @param lerp_x Numeric. Horizontal interpolation factor from 0 to 1 (default: 1).
+    #' @param lerp_y Numeric. Vertical interpolation factor from 0 to 1 (default: 1).
+    #' @param round_pixels Logical. Whether to round camera pixels to avoid sub-pixel rendering (default: TRUE).
+    follow_camera = function(lerp_x = 1,
+                             lerp_y = 1,
+                             round_pixels = TRUE) {
+      js <- sprintf(
+        "followSpriteWithCamera('%s', %f, %f, %s);",
+        private$name, lerp_x, lerp_y, tolower(round_pixels)
+      )
+      send_js(private, js)
+    },
+    #' @description Stop the camera from following this rectangle.
+    stop_camera_follow = function() {
+      js <- sprintf("stopCameraFollow('%s');", private$name)
+      send_js(private, js)
+    },
+    #' @description Set how much this rectangle scrolls with the camera.
+    #' @param x Numeric. Horizontal scroll factor (0 = fixed to viewport, 1 = scrolls with world).
+    #' @param y Numeric. Vertical scroll factor. Defaults to `x`.
+    set_scroll_factor = function(x, y = x) {
+      js <- sprintf("setScrollFactor('%s', %f, %f);", private$name, x, y)
+      send_js(private, js)
+    },
+    #' @description Set the rectangle's rendering depth. Objects with a larger
+    #'   depth are rendered in front of objects with a smaller depth.
+    #' @param depth Numeric. Phaser rendering depth.
+    #' @return This rectangle object, invisibly, to support method chaining.
+    set_depth = function(depth) {
+      js <- sprintf("setSpriteDepth('%s', %f);", private$name, depth)
+      send_js(private, js)
+      invisible(self)
+    },
     #' @description Add a click event listener to the rectangle that triggers an R
     #'  function when clicked.
     #' @param event_fun A function.

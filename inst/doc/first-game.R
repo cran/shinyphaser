@@ -7,6 +7,8 @@ knitr::opts_chunk$set(
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -23,7 +25,7 @@ knitr::opts_chunk$set(
 ## ----eval=FALSE---------------------------------------------------------------
 # floor <- game$add_image(
 #   name = "floor",
-#   url = "assets/hedgehog/terrain/grass.png",
+#   url = "hedgehog-assets/terrain/grass.png",
 #   x = 800,
 #   y = 300
 # )
@@ -31,6 +33,8 @@ knitr::opts_chunk$set(
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -43,7 +47,7 @@ knitr::opts_chunk$set(
 # 
 #   floor <- game$add_image(
 #     name = "floor",
-#     url = "assets/hedgehog/terrain/grass.png",
+#     url = "hedgehog-assets/terrain/grass.png",
 #     x = 800,
 #     y = 300
 #   )
@@ -58,7 +62,7 @@ knitr::include_graphics("assets/first_game_2_add_background.png")
 ## ----eval=FALSE---------------------------------------------------------------
 # hedgehog <- game$add_sprite(
 #   name = "hedgehog",
-#   url = "assets/hedgehog/sprites/hedgehog_32.png",
+#   url = "hedgehog-assets/sprites/hedgehog_32.png",
 #   x = 140,
 #   y = 260,
 #   frame_width = 32,
@@ -73,6 +77,8 @@ knitr::include_graphics("assets/hedgehog_32.png")
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -85,14 +91,14 @@ knitr::include_graphics("assets/hedgehog_32.png")
 # 
 #   floor <- game$add_image(
 #     name = "floor",
-#     url = "assets/hedgehog/terrain/grass.png",
+#     url = "hedgehog-assets/terrain/grass.png",
 #     x = 800,
 #     y = 300
 #   )
 # 
 #   hedgehog <- game$add_sprite(
 #     name = "hedgehog",
-#     url = "assets/hedgehog/sprites/hedgehog_32.png",
+#     url = "hedgehog-assets/sprites/hedgehog_32.png",
 #     x = 140,
 #     y = 260,
 #     frame_width = 32,
@@ -116,6 +122,8 @@ knitr::include_graphics("assets/first_game_3_add_sprite.gif")
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -128,14 +136,14 @@ knitr::include_graphics("assets/first_game_3_add_sprite.gif")
 # 
 #   floor <- game$add_image(
 #     name = "floor",
-#     url = "assets/hedgehog/terrain/grass.png",
+#     url = "hedgehog-assets/terrain/grass.png",
 #     x = 800,
 #     y = 300
 #   )
 # 
 #   hedgehog <- game$add_sprite(
 #     name = "hedgehog",
-#     url = "assets/hedgehog/sprites/hedgehog_32.png",
+#     url = "hedgehog-assets/sprites/hedgehog_32.png",
 #     x = 140,
 #     y = 260,
 #     frame_width = 32,
@@ -165,7 +173,7 @@ knitr::include_graphics("assets/hedgehog_move_left_32.png")
 # for (move in moves) {
 #   hedgehog$add_animation(
 #     suffix = move,
-#     url = paste0("assets/hedgehog/sprites/hedgehog_", move, "_32.png"),
+#     url = paste0("hedgehog-assets/sprites/hedgehog_", move, "_32.png"),
 #     frame_width = 32,
 #     frame_height = 32,
 #     frame_rate = 5
@@ -175,6 +183,8 @@ knitr::include_graphics("assets/hedgehog_move_left_32.png")
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -187,14 +197,14 @@ knitr::include_graphics("assets/hedgehog_move_left_32.png")
 # 
 #   floor <- game$add_image(
 #     name = "floor",
-#     url = "assets/hedgehog/terrain/grass.png",
+#     url = "hedgehog-assets/terrain/grass.png",
 #     x = 800,
 #     y = 300
 #   )
 # 
 #   hedgehog <- game$add_sprite(
 #     name = "hedgehog",
-#     url = "assets/hedgehog/sprites/hedgehog_32.png",
+#     url = "hedgehog-assets/sprites/hedgehog_32.png",
 #     x = 140,
 #     y = 260,
 #     frame_width = 32,
@@ -213,7 +223,7 @@ knitr::include_graphics("assets/hedgehog_move_left_32.png")
 #   for (move in moves) {
 #     hedgehog$add_animation(
 #       suffix = move,
-#       url = paste0("assets/hedgehog/sprites/hedgehog_", move, "_32.png"),
+#       url = paste0("hedgehog-assets/sprites/hedgehog_", move, "_32.png"),
 #       frame_width = 32,
 #       frame_height = 32,
 #       frame_rate = 5
@@ -227,29 +237,31 @@ knitr::include_graphics("assets/hedgehog_move_left_32.png")
 knitr::include_graphics("assets/first_game_5_move_animation.gif")
 
 ## ----eval=FALSE---------------------------------------------------------------
-# score <- reactiveVal(0)
-# apples <- game$add_static_group("apples", "assets/hedgehog/perks/apple_20.png")
+# apples <- game$add_static_group("apples", "hedgehog-assets/perks/apple_20.png")
 # 
 # apples$create(260, 140)
 # apples$create(640, 180)
 # apples$create(730, 390)
 # 
 # score_text <- game$add_text(text = "Score: 0", id = "score", x = 20, y = 20)
+# score <- game$add_state("score", 0)
 # 
 # game$add_overlap(
 #   object_one = "hedgehog",
 #   group = "apples",
-#   callback_fun = function(evt) {
-#     apples$disable(evt)        # hide collected apple
-#     score(score() + 1)
-#     score_text$set(paste("Score:", score()))
-#   },
+#   browser_action = browser_actions({
+#     apples$disable()
+#     score$increment()
+#     score_text$set(score$value())
+#   }),
 #   input = input
 # )
 
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -262,14 +274,14 @@ knitr::include_graphics("assets/first_game_5_move_animation.gif")
 # 
 #   floor <- game$add_image(
 #     name = "floor",
-#     url = "assets/hedgehog/terrain/grass.png",
+#     url = "hedgehog-assets/terrain/grass.png",
 #     x = 800,
 #     y = 300
 #   )
 # 
 #   hedgehog <- game$add_sprite(
 #     name = "hedgehog",
-#     url = "assets/hedgehog/sprites/hedgehog_32.png",
+#     url = "hedgehog-assets/sprites/hedgehog_32.png",
 #     x = 140,
 #     y = 260,
 #     frame_width = 32,
@@ -288,7 +300,7 @@ knitr::include_graphics("assets/first_game_5_move_animation.gif")
 #   for (move in moves) {
 #     hedgehog$add_animation(
 #       suffix = move,
-#       url = paste0("assets/hedgehog/sprites/hedgehog_", move, "_32.png"),
+#       url = paste0("hedgehog-assets/sprites/hedgehog_", move, "_32.png"),
 #       frame_width = 32,
 #       frame_height = 32,
 #       frame_rate = 5
@@ -296,7 +308,7 @@ knitr::include_graphics("assets/first_game_5_move_animation.gif")
 #   }
 # 
 #   score <- reactiveVal(0)
-#   apples <- game$add_static_group("apples", "assets/hedgehog/perks/apple_20.png")
+#   apples <- game$add_static_group("apples", "hedgehog-assets/perks/apple_20.png")
 # 
 #   apples$create(260, 140)
 #   apples$create(640, 180)
@@ -307,11 +319,6 @@ knitr::include_graphics("assets/first_game_5_move_animation.gif")
 #   game$add_overlap(
 #     object_one = "hedgehog",
 #     group = "apples",
-#     callback_fun = function(evt) {
-#       apples$disable(evt)        # hide collected apple
-#       score(score() + 1)
-#       score_text$set(paste("Score:", score()))
-#     },
 #     input = input
 #   )
 # }
@@ -325,7 +332,7 @@ knitr::include_graphics("assets/first_game_6_overlap.gif")
 # 
 # rocks <- game$add_static_group(
 #   name = "rocks",
-#   url = "assets/hedgehog/obstacles/rock.png"
+#   url = "hedgehog-assets/obstacles/rock.png"
 # )
 # 
 # rocks$create(
@@ -346,6 +353,8 @@ knitr::include_graphics("assets/first_game_6_overlap.gif")
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -358,14 +367,14 @@ knitr::include_graphics("assets/first_game_6_overlap.gif")
 # 
 #   floor <- game$add_image(
 #     name = "floor",
-#     url = "assets/hedgehog/terrain/grass.png",
+#     url = "hedgehog-assets/terrain/grass.png",
 #     x = 800,
 #     y = 300
 #   )
 # 
 #   hedgehog <- game$add_sprite(
 #     name = "hedgehog",
-#     url = "assets/hedgehog/sprites/hedgehog_32.png",
+#     url = "hedgehog-assets/sprites/hedgehog_32.png",
 #     x = 140,
 #     y = 260,
 #     frame_width = 32,
@@ -386,7 +395,7 @@ knitr::include_graphics("assets/first_game_6_overlap.gif")
 #   for (move in moves) {
 #     hedgehog$add_animation(
 #       suffix = move,
-#       url = paste0("assets/hedgehog/sprites/hedgehog_", move, "_32.png"),
+#       url = paste0("hedgehog-assets/sprites/hedgehog_", move, "_32.png"),
 #       frame_width = 32,
 #       frame_height = 32,
 #       frame_rate = 5
@@ -394,7 +403,7 @@ knitr::include_graphics("assets/first_game_6_overlap.gif")
 #   }
 # 
 #   score <- reactiveVal(0)
-#   apples <- game$add_static_group("apples", "assets/hedgehog/perks/apple_20.png")
+#   apples <- game$add_static_group("apples", "hedgehog-assets/perks/apple_20.png")
 # 
 #   apples$create(260, 140)
 #   apples$create(640, 180)
@@ -402,7 +411,7 @@ knitr::include_graphics("assets/first_game_6_overlap.gif")
 # 
 #   rocks <- game$add_static_group(
 #     name = "rocks",
-#     url = "assets/hedgehog/obstacles/rock.png"
+#     url = "hedgehog-assets/obstacles/rock.png"
 #   )
 # 
 #   rocks$create(400, 200)
@@ -413,11 +422,6 @@ knitr::include_graphics("assets/first_game_6_overlap.gif")
 #   game$add_overlap(
 #     object_one = "hedgehog",
 #     group = "apples",
-#     callback_fun = function(evt) {
-#       apples$disable(evt)        # hide collected apple
-#       score(score() + 1)
-#       score_text$set(paste("Score:", score()))
-#     },
 #     input = input
 #   )
 # 
@@ -434,7 +438,7 @@ knitr::include_graphics("assets/first_game_7_collide.gif")
 ## ----eval=FALSE---------------------------------------------------------------
 # enemy <- game$add_sprite(
 #   name = "badger",
-#   url = "assets/hedgehog/sprites/badger_move_left_50.png",
+#   url = "hedgehog-assets/sprites/badger_move_left_50.png",
 #   x = 700,
 #   y = 300,
 #   frame_width = 50,
@@ -446,13 +450,6 @@ knitr::include_graphics("assets/first_game_7_collide.gif")
 # game$add_overlap(
 #   object_one = "hedgehog",
 #   object_two = "badger",
-#   callback_fun = function(evt) {
-#     shinyalert::shinyalert(
-#       title = "Game over", type = "error",
-#       closeOnClickOutside = FALSE, showCancelButton = FALSE,
-#       callbackR = function(value) shiny::stopApp()
-#     )
-#   },
 #   input = input
 # )
 # 
@@ -474,6 +471,8 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 ## ----eval=FALSE---------------------------------------------------------------
 # library(shiny)
 # library(shinyphaser)
+# shiny::addResourcePath("hedgehog-assets",
+#   system.file("examples", "hedgehog", "www", package = "shinyphaser"))
 # 
 # game <- PhaserGame$new(width = 1500, height = 800)
 # 
@@ -486,14 +485,14 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 # 
 #   floor <- game$add_image(
 #     name = "floor",
-#     url = "assets/hedgehog/terrain/grass.png",
+#     url = "hedgehog-assets/terrain/grass.png",
 #     x = 800,
 #     y = 300
 #   )
 # 
 #   hedgehog <- game$add_sprite(
 #     name = "hedgehog",
-#     url = "assets/hedgehog/sprites/hedgehog_32.png",
+#     url = "hedgehog-assets/sprites/hedgehog_32.png",
 #     x = 140,
 #     y = 260,
 #     frame_width = 32,
@@ -514,7 +513,7 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 #   for (move in moves) {
 #     hedgehog$add_animation(
 #       suffix = move,
-#       url = paste0("assets/hedgehog/sprites/hedgehog_", move, "_32.png"),
+#       url = paste0("hedgehog-assets/sprites/hedgehog_", move, "_32.png"),
 #       frame_width = 32,
 #       frame_height = 32,
 #       frame_rate = 5
@@ -522,7 +521,7 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 #   }
 # 
 #   score <- reactiveVal(0)
-#   apples <- game$add_static_group("apples", "assets/hedgehog/perks/apple_20.png")
+#   apples <- game$add_static_group("apples", "hedgehog-assets/perks/apple_20.png")
 # 
 #   apples$create(260, 140)
 #   apples$create(640, 180)
@@ -530,7 +529,7 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 # 
 #   rocks <- game$add_static_group(
 #     name = "rocks",
-#     url = "assets/hedgehog/obstacles/rock.png"
+#     url = "hedgehog-assets/obstacles/rock.png"
 #   )
 # 
 #   rocks$create(400, 200)
@@ -541,11 +540,6 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 #   game$add_overlap(
 #     object_one = "hedgehog",
 #     group = "apples",
-#     callback_fun = function(evt) {
-#       apples$disable(evt)
-#       score(score() + 1)
-#       score_text$set(paste("Score:", score()))
-#     },
 #     input = input
 #   )
 # 
@@ -556,7 +550,7 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 # 
 #   enemy <- game$add_sprite(
 #     name = "badger",
-#     url = "assets/hedgehog/sprites/badger_move_left_50.png",
+#     url = "hedgehog-assets/sprites/badger_move_left_50.png",
 #     x = 700,
 #     y = 300,
 #     frame_width = 50,
@@ -568,13 +562,6 @@ knitr::include_graphics("assets/first_game_8_full_example.gif")
 #   game$add_overlap(
 #     object_one = "hedgehog",
 #     object_two = "badger",
-#     callback_fun = function(evt) {
-#       shinyalert::shinyalert(
-#         title = "Game over", type = "error",
-#         closeOnClickOutside = FALSE, showCancelButton = FALSE,
-#         callbackR = function(value) shiny::stopApp()
-#       )
-#     },
 #     input = input
 #   )
 # 

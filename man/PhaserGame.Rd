@@ -5,7 +5,7 @@
 \title{PhaserGame}
 \description{
 R6 class to create and manage a Phaser game within a Shiny application.
-Provides methods for adding sprites, animations, images, backgrounds, controls, and collision handling.
+Provides methods for adding sprites, animations, images, sounds, backgrounds, controls, and collision handling.
 }
 \examples{
 
@@ -33,13 +33,23 @@ game <- PhaserGame$new(id = "my_game", width = 1024, height = 768)
 \itemize{
 \item \href{#method-PhaserGame-new}{\code{PhaserGame$new()}}
 \item \href{#method-PhaserGame-set_shiny_session}{\code{PhaserGame$set_shiny_session()}}
+\item \href{#method-PhaserGame-save_game}{\code{PhaserGame$save_game()}}
+\item \href{#method-PhaserGame-list_saved_games}{\code{PhaserGame$list_saved_games()}}
+\item \href{#method-PhaserGame-load_game}{\code{PhaserGame$load_game()}}
 \item \href{#method-PhaserGame-use_phaser}{\code{PhaserGame$use_phaser()}}
 \item \href{#method-PhaserGame-add_text}{\code{PhaserGame$add_text()}}
 \item \href{#method-PhaserGame-add_rectangle}{\code{PhaserGame$add_rectangle()}}
 \item \href{#method-PhaserGame-add_image}{\code{PhaserGame$add_image()}}
+\item \href{#method-PhaserGame-add_sound}{\code{PhaserGame$add_sound()}}
+\item \href{#method-PhaserGame-add_state}{\code{PhaserGame$add_state()}}
+\item \href{#method-PhaserGame-add_cooldown}{\code{PhaserGame$add_cooldown()}}
 \item \href{#method-PhaserGame-add_map}{\code{PhaserGame$add_map()}}
+\item \href{#method-PhaserGame-activate_map}{\code{PhaserGame$activate_map()}}
+\item \href{#method-PhaserGame-add_proximity_trigger}{\code{PhaserGame$add_proximity_trigger()}}
+\item \href{#method-PhaserGame-set_world_bounds}{\code{PhaserGame$set_world_bounds()}}
 \item \href{#method-PhaserGame-enable_terrain_collision}{\code{PhaserGame$enable_terrain_collision()}}
 \item \href{#method-PhaserGame-add_sprite}{\code{PhaserGame$add_sprite()}}
+\item \href{#method-PhaserGame-add_collision_rectangle}{\code{PhaserGame$add_collision_rectangle()}}
 \item \href{#method-PhaserGame-add_group}{\code{PhaserGame$add_group()}}
 \item \href{#method-PhaserGame-add_static_sprite}{\code{PhaserGame$add_static_sprite()}}
 \item \href{#method-PhaserGame-add_static_group}{\code{PhaserGame$add_static_group()}}
@@ -57,7 +67,13 @@ game <- PhaserGame$new(id = "my_game", width = 1024, height = 768)
 \subsection{Method \code{new()}}{
 Create a PhaserGame object with the given configuration.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$new(id = "phaser_game", width = 800, height = 600)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$new(
+  id = "phaser_game",
+  width = 800,
+  height = 600,
+  gravity_x = 0,
+  gravity_y = 0
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -68,6 +84,10 @@ Create a PhaserGame object with the given configuration.
 \item{\code{width}}{Numeric. Width of the Phaser canvas in pixels (defaults to 800).}
 
 \item{\code{height}}{Numeric. Height of the Phaser canvas in pixels (defaults to 600).}
+
+\item{\code{gravity_x}}{Numeric. Horizontal Arcade Physics world gravity (defaults to 0).}
+
+\item{\code{gravity_y}}{Numeric. Vertical Arcade Physics world gravity (defaults to 0).}
 }
 \if{html}{\out{</div>}}
 }
@@ -101,6 +121,90 @@ Set the Shiny session used to send Phaser custom messages.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-save_game"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-save_game}{}}}
+\subsection{Method \code{save_game()}}{
+Save game data and Phaser object state to a JSON file on the
+server. Positions are read directly from Phaser immediately before the
+save request, avoiding stale Shiny coordinates.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$save_game(
+  name,
+  state = list(),
+  objects = NULL,
+  snapshot = NULL,
+  directory = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{Character. Human-readable name of the save.}
+
+\item{\code{state}}{Named list. Additional JSON-serializable application state.}
+
+\item{\code{objects}}{Character vector. Named Phaser scene objects to capture. By
+default all named scene objects are captured.}
+
+\item{\code{snapshot}}{Named list. Optional Phaser object snapshot already
+captured in the browser. Supplying it writes the save synchronously.}
+
+\item{\code{directory}}{Character. Server-side directory. Defaults to a
+game-specific folder below \code{\link[=tempdir]{tempdir()}}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisible request identifier. The disk write completes
+asynchronously after Phaser returns its snapshot.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-list_saved_games"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-list_saved_games}{}}}
+\subsection{Method \code{list_saved_games()}}{
+List saves stored on the server for this game.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$list_saved_games(directory = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{directory}}{Character. Server-side save directory.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A list of saved game records, newest first.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-load_game"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-load_game}{}}}
+\subsection{Method \code{load_game()}}{
+Load a saved game from server disk.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$load_game(name, restore = TRUE, directory = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{Character. Save name.}
+
+\item{\code{restore}}{Logical. Restore captured Phaser object properties.}
+
+\item{\code{directory}}{Character. Server-side save directory.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+The additional application state stored with the save, invisibly.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PhaserGame-use_phaser"></a>}}
 \if{latex}{\out{\hypertarget{method-PhaserGame-use_phaser}{}}}
 \subsection{Method \code{use_phaser()}}{
@@ -127,7 +231,14 @@ HTML tag list containing dependencies and initialization script.
 \subsection{Method \code{add_text()}}{
 Add a text object to the Phaser scene.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_text(text, id, x, y, style = list(font_size = "22px"))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_text(
+  text,
+  id,
+  x,
+  y,
+  style = list(font_size = "22px"),
+  visible = TRUE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -142,6 +253,8 @@ Add a text object to the Phaser scene.
 \item{\code{y}}{Numeric. Y-coordinate in pixels.}
 
 \item{\code{style}}{Named list. Styling options passed to Phaser text rendering.}
+
+\item{\code{visible}}{Logical. Whether text is initially visible.}
 }
 \if{html}{\out{</div>}}
 }
@@ -214,6 +327,67 @@ Adds a static image to the Phaser scene.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-add_sound"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-add_sound}{}}}
+\subsection{Method \code{add_sound()}}{
+Adds a sound to the Phaser scene.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_sound(name, url, volume = 1, loop = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{Character. Unique key to reference this sound.}
+
+\item{\code{url}}{Character. URL or path to the audio file.}
+
+\item{\code{volume}}{Numeric. Initial playback volume from 0 to 1 (default: 1).}
+
+\item{\code{loop}}{Logical. Whether the sound should loop by default (default: FALSE).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-add_state"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-add_state}{}}}
+\subsection{Method \code{add_state()}}{
+Create browser-resident state for use in browser actions.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_state(key, initial = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{key}}{Character. Unique state key.}
+
+\item{\code{initial}}{Initial JSON-serializable value.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-add_cooldown"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-add_cooldown}{}}}
+\subsection{Method \code{add_cooldown()}}{
+Create a browser-resident cooldown for browser-action conditions.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_cooldown(key, duration)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{key}}{Character. Unique cooldown key.}
+
+\item{\code{duration}}{Numeric. Cooldown duration in milliseconds.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PhaserGame-add_map"></a>}}
 \if{latex}{\out{\hypertarget{method-PhaserGame-add_map}{}}}
 \subsection{Method \code{add_map()}}{
@@ -234,6 +408,111 @@ Add a background (tilemap) layer from Tiled JSON + tileset image(s).
 \item{\code{tileset_names}}{Character vector. Names of tilesets as defined in Tiled.}
 
 \item{\code{layer_name}}{Character. Name of the layer to render from Tiled.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisible; sends a custom message to the client.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-activate_map"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-activate_map}{}}}
+\subsection{Method \code{activate_map()}}{
+Activate a tilemap previously loaded with \code{add_map()}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$activate_map(
+  map_key,
+  player_name = NULL,
+  x = NULL,
+  y = NULL,
+  visible_objects = character(),
+  hidden_objects = character()
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{map_key}}{Character. Key of the tilemap to activate.}
+
+\item{\code{player_name}}{Character. Optional player sprite to reposition.}
+
+\item{\code{x}}{Numeric. Optional player x-coordinate.}
+
+\item{\code{y}}{Numeric. Optional player y-coordinate.}
+
+\item{\code{visible_objects}}{Character vector. Scene objects to show and enable.}
+
+\item{\code{hidden_objects}}{Character vector. Scene objects to hide and disable.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisible; sends a custom message to the client.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-add_proximity_trigger"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-add_proximity_trigger}{}}}
+\subsection{Method \code{add_proximity_trigger()}}{
+Add a trigger that monitors when a scene object is near a point.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_proximity_trigger(
+  id,
+  object_name,
+  x,
+  y,
+  radius = 180,
+  element_id = NULL,
+  context = NULL,
+  input_id = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{Character. Unique trigger identifier.}
+
+\item{\code{object_name}}{Character. Scene object whose position is monitored.}
+
+\item{\code{x}}{Numeric. Target x-coordinate.}
+
+\item{\code{y}}{Numeric. Target y-coordinate.}
+
+\item{\code{radius}}{Numeric. Maximum distance at which the trigger is active.}
+
+\item{\code{element_id}}{Character or \code{NULL}. ID of an HTML element to show while
+the trigger is active.}
+
+\item{\code{context}}{Character or \code{NULL}. Optional map key that must be active for
+the trigger to be evaluated.}
+
+\item{\code{input_id}}{Character or \code{NULL}. Optional Shiny input that receives a
+payload whenever the trigger is entered or exited.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisible; sends a custom message to the client.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-set_world_bounds"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-set_world_bounds}{}}}
+\subsection{Method \code{set_world_bounds()}}{
+Set the Phaser physics world and camera bounds.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$set_world_bounds(width, height)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{width}}{Numeric. World width in pixels.}
+
+\item{\code{height}}{Numeric. World height in pixels.}
 }
 \if{html}{\out{</div>}}
 }
@@ -294,6 +573,31 @@ Load a base spritesheet and create an "idle" animation.
 \item{\code{frame_count}}{Numeric. Number of frames in the spritesheet.}
 
 \item{\code{frame_rate}}{Numeric. Frames per second for the idle animation.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PhaserGame-add_collision_rectangle"></a>}}
+\if{latex}{\out{\hypertarget{method-PhaserGame-add_collision_rectangle}{}}}
+\subsection{Method \code{add_collision_rectangle()}}{
+Add an invisible static collision rectangle to the world.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_collision_rectangle(name, x, y, width, height)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{name}}{Character. Unique name of the collision rectangle.}
+
+\item{\code{x}}{Numeric. X-coordinate of its center.}
+
+\item{\code{y}}{Numeric. Y-coordinate of its center.}
+
+\item{\code{width}}{Numeric. Collision width in pixels.}
+
+\item{\code{height}}{Numeric. Collision height in pixels.}
 }
 \if{html}{\out{</div>}}
 }
@@ -367,8 +671,9 @@ Adds a collider between two game objects.
   object_one,
   object_two = NULL,
   group = NULL,
-  callback_fun = NULL,
-  input
+  browser_action = browser_actions(),
+  input = NULL,
+  server_action = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -381,9 +686,12 @@ Adds a collider between two game objects.
 
 \item{\code{group}}{Character. Name of the group to compare against.}
 
-\item{\code{callback_fun}}{A function to be run when collision occurs.}
+\item{\code{browser_action}}{Actions created with \code{\link[=browser_actions]{browser_actions()}} that run
+immediately in the browser.}
 
 \item{\code{input}}{Shiny input list.}
+
+\item{\code{server_action}}{Function called in R with the collision event.}
 }
 \if{html}{\out{</div>}}
 }
@@ -398,8 +706,11 @@ Adds a collider between two game objects.
   object_one,
   object_two = NULL,
   group = NULL,
-  callback_fun,
-  input
+  browser_action = browser_actions(),
+  input = NULL,
+  server_action = NULL,
+  mode = c("enter", "stay"),
+  interval = 0
 )}\if{html}{\out{</div>}}
 }
 
@@ -412,9 +723,17 @@ Adds a collider between two game objects.
 
 \item{\code{group}}{Character. Name of the group.}
 
-\item{\code{callback_fun}}{A function to be run when overlap occurs.}
+\item{\code{browser_action}}{Actions created with \code{\link[=browser_actions]{browser_actions()}} that run
+immediately in the browser.}
 
 \item{\code{input}}{Shiny input list.}
+
+\item{\code{server_action}}{Function called in R with the overlap event.}
+
+\item{\code{mode}}{Character. \code{"enter"} (default) runs once per contact;
+\code{"stay"} repeats while overlapping.}
+
+\item{\code{interval}}{Numeric. Minimum milliseconds between \code{"stay"} actions.}
 }
 \if{html}{\out{</div>}}
 }
@@ -450,8 +769,9 @@ Register a callback fired when overlap between objects ends.
   object_one,
   object_two = NULL,
   group = NULL,
-  callback_fun,
-  input,
+  browser_action = browser_actions(),
+  input = NULL,
+  server_action = NULL,
   session = shiny::getDefaultReactiveDomain()
 )}\if{html}{\out{</div>}}
 }
@@ -465,9 +785,12 @@ Register a callback fired when overlap between objects ends.
 
 \item{\code{group}}{Character. Name of the group to compare against.}
 
-\item{\code{callback_fun}}{Function. Callback executed when overlap ends.}
+\item{\code{browser_action}}{Actions created with \code{\link[=browser_actions]{browser_actions()}} that run
+immediately in the browser.}
 
 \item{\code{input}}{Shiny input list.}
+
+\item{\code{server_action}}{Function called in R with the overlap-end event.}
 
 \item{\code{session}}{Shiny session object.}
 }
@@ -480,7 +803,12 @@ Register a callback fired when overlap between objects ends.
 \subsection{Method \code{add_control()}}{
 Register a callback fired when a specific key is pressed.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_control(key, action, input)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PhaserGame$add_control(
+  key,
+  browser_action = browser_actions(),
+  input = NULL,
+  server_action = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -489,9 +817,12 @@ Register a callback fired when a specific key is pressed.
 \item{\code{key}}{A character, accepts Javascript key events (they need to align with
 event.code).}
 
-\item{\code{action}}{A function to be run after key is pressed.}
+\item{\code{browser_action}}{Actions created with \code{\link[=browser_actions]{browser_actions()}} that run
+immediately in the browser.}
 
 \item{\code{input}}{Shiny input list.}
+
+\item{\code{server_action}}{Function called in R with the keyboard event.}
 }
 \if{html}{\out{</div>}}
 }

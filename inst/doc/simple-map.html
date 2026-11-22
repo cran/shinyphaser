@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Create a simple tile map</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Create a simple tile map</h1>
+
+
+
+<p>A tile map describes which small terrain image belongs at each
+position in a grid. <strong>shinyphaser</strong> loads maps in <a href="https://www.mapeditor.org/">Tiled</a> JSON format through Phaser.
+These files can be generated programmatically, including with LLM
+assistance, or exported from the Tiled editor using a compatible
+configuration. The Swamps RPG map was created with LLM assistance.</p>
+<p>This article builds a tiny room from two tiles.</p>
+<div id="start-with-a-tiny-room" class="section level2">
+<h2>Start with a tiny room</h2>
+<p>Create an <strong>8-by-6 room</strong> with only two tile IDs:
+<strong>1 is floor</strong> and <strong>2 is wall</strong>. Each tile is
+64 pixels square. The room has a border and two wall tiles in the
+middle:</p>
+<pre class="text"><code>########
+#......#
+#..##..#
+#......#
+#......#
+########</code></pre>
+<p>Here <code>.</code> means floor and <code>#</code> means wall. A
+small orange square will be the player. The complete app, images, and
+JSON map are already provided in <code>inst/examples/simple-map</code>,
+so no file-generation step or Tiled installation is needed.</p>
+<div id="run-the-example" class="section level3">
+<h3>Run the example</h3>
+<p>With shinyphaser installed, run this from the repository root:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>shiny<span class="sc">::</span><span class="fu">runApp</span>(<span class="st">&quot;inst/examples/simple-map&quot;</span>)</span></code></pre></div>
+<p>The example contains:</p>
+<pre class="text"><code>inst/examples/simple-map/
+  app.R
+  www/
+    room.json
+    floor.png
+    wall.png
+    player.png</code></pre>
+<p><code>room.json</code> contains the 8-by-6 tile grid and two embedded
+tileset definitions. Each tileset contains one image, and only the wall
+tile has the Boolean property <code>collides = true</code>.</p>
+</div>
+<div id="how-the-app-loads-the-map" class="section level3">
+<h3>How the app loads the map</h3>
+<p>The following code is the supplied
+<strong><code>inst/examples/simple-map/app.R</code></strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(shiny)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">library</span>(shinyphaser)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>game <span class="ot">&lt;-</span> PhaserGame<span class="sc">$</span><span class="fu">new</span>(<span class="at">width =</span> <span class="dv">512</span>, <span class="at">height =</span> <span class="dv">384</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>ui <span class="ot">&lt;-</span> <span class="fu">tagList</span>(tags<span class="sc">$</span><span class="fu">p</span>(<span class="st">&quot;Arrow keys: move the orange square. Walls block movement.&quot;</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>              game<span class="sc">$</span><span class="fu">use_phaser</span>())</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) {</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  game <span class="ot">&lt;-</span> PhaserGame<span class="sc">$</span><span class="fu">new</span>(<span class="at">width =</span> <span class="dv">512</span>, <span class="at">height =</span> <span class="dv">384</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  game<span class="sc">$</span><span class="fu">set_shiny_session</span>(session)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  game<span class="sc">$</span><span class="fu">set_world_bounds</span>(<span class="dv">512</span>, <span class="dv">384</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  game<span class="sc">$</span><span class="fu">add_map</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    <span class="at">map_key =</span> <span class="st">&quot;room&quot;</span>, <span class="at">map_url =</span> <span class="st">&quot;room.json&quot;</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    <span class="at">tileset_urls =</span> <span class="fu">c</span>(<span class="st">&quot;floor.png&quot;</span>, <span class="st">&quot;wall.png&quot;</span>),</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>    <span class="at">tileset_names =</span> <span class="fu">c</span>(<span class="st">&quot;floor&quot;</span>, <span class="st">&quot;wall&quot;</span>), <span class="at">layer_name =</span> <span class="st">&quot;terrain&quot;</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  )</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  player <span class="ot">&lt;-</span> game<span class="sc">$</span><span class="fu">add_sprite</span>(</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    <span class="st">&quot;player&quot;</span>, <span class="st">&quot;player.png&quot;</span>, <span class="at">x =</span> <span class="dv">96</span>, <span class="at">y =</span> <span class="dv">96</span>,</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>    <span class="at">frame_width =</span> <span class="dv">32</span>, <span class="at">frame_height =</span> <span class="dv">32</span>, <span class="at">frame_count =</span> <span class="dv">1</span>, <span class="at">frame_rate =</span> <span class="dv">1</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  )</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  player<span class="sc">$</span><span class="fu">add_player_controls</span>(<span class="at">speed =</span> <span class="dv">140</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  game<span class="sc">$</span><span class="fu">enable_terrain_collision</span>(<span class="st">&quot;player&quot;</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>}</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">shinyApp</span>(ui, server)</span></code></pre></div>
+<p>Shiny serves the files in the app’s <code>www/</code> folder, so the
+URLs above need no extra resource-path setup. The first loaded map
+becomes active automatically. The 512-by-384 canvas matches
+<code>8 * 64</code> by <code>6 * 64</code> pixels, and the player starts
+in the center of the first interior floor tile.</p>
+<p>Try moving across the floor and into both the border and the middle
+wall. To change the room, edit the tile-data array in
+<code>www/room.json</code> (1 for floor, 2 for wall), or open that JSON
+file in Tiled, then restart the app. You now have the same basic
+ingredients as a larger map: tile IDs, tileset images, a terrain layer,
+and an actor registered for terrain collision. Phaser still loads from
+jsDelivr, so the browser needs Internet access.</p>
+</div>
+<div id="see-the-example-in-action" class="section level3">
+<h3>See the example in action</h3>
+<p>The orange square moves across the floor and stops at the room’s
+border and the wall in the middle:</p>
+<p><img role="img" aria-label="Orange player moving through a small tile map and colliding with walls" src="data:image/gif;base64,R0lGODlhAAKAAYEAAP+7RFB8RThBUgAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQERgAAACwAAAAAAAKAAQAI/wAFCBxIsKDBgwgTKlzIsKHDhxAjSpxIsaLFixgzatzIsaPHjyBDihxJsqTJkyhTqlzJsqXLlzBjypxJs6bNmzhz6tzJs6fPn0CDCh1KtKjRo0iTKl3KtKnTp1CjSp1KtarVq1izat3KtavXr2DDih1LtqzZs2jTql3Ltq3bt3Djyp1Lt67du3jz6t3Lt6/fv4ADCx5MuLDhw4gTK17MuLHjx5AjS55MubLly5gza97MubPnz6BDix5NurTp06hTq17NurXr17Bjy55Nu7bt27hz697Nu7fv38CDCx9OvLjx48iTK1/OvLnz59CjS59Ovbr169iza9/Ovbv37+DDi/8fT768+fPo06tfz769+/fw48ufT7++/fv48+vfz7+////ABSDggAQWaOCBCCao4IIMNujggxBGKOGEFFZo4YUYZqjhhgYCxuGHIIYo4ogklmjiiShW6GGKLLbo4oswxijjiyvOaOONOOao444i1sjjj0AGKeSQLvpI5JFIJqnkkgUayeSTUEYpZYpOTmnllVhm2WCVWnbp5ZdPcgnmmGSWiaOYZqap5pojosnmm3DGCaGbctZpp5103qnnnmbmyeefgGLpZ6CEFqrkoAEAoOiijDbq6KOMGirppCr+BSGkmGbaKKWcdsogopqGiqmnpJY6IKiiphqpqaxyiqqqqrb/Kqukr8Iq6qy4BlqrrZrm6uueu/I66q/EyhmssI8Wq+ybxyK76bLQ9mnpg872Gu21YDZbraLYdtulttt6K+6V4FY77rlRlussuuwuqS6y7cZ75LvCymtvkPTyeu++O+ZrK78A3+gvrAEXHOPAsRqsMIsIp7rwwyc2fCvEFPc4rYPbDlvxxhtKHCrHIGfosbUhlzzhyJmarHKEKGu88ssKtgwpzDQnKHOyNedM4M2O6uxzADw/+3PNiA5tdMcXH620iUUv7bSETT8t9ZZJT231hVFfrfXOVW/ttYNZf3112GJPTXbZT5+N9tJqr310224PDXfcPs9Nd852301z3n/y/82n38B2TSzgehJ+p+F4Cv4r4nUybqzivjoep+RwUs4s5Llazqbma3Kupudpgi6tX9eKXqbpZKI+purZYo4r61/C7qXs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" alt="Orange player moving through a small tile map and colliding with walls" width="512px" /></p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

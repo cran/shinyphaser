@@ -9,30 +9,48 @@ function addImage(imageName, imageUrl, x = null, y = null, visible = true, click
       ? y
       : scene.cameras.main.height / 2;
 
-    scene[imageName] = scene.add.image(px, py, imageName);
+    scene[imageName] = scene.add.image(px, py, imageName).setName(imageName);
     if (clickable) {
       scene[imageName].setInteractive();
     }
     scene[imageName].setVisible(visible);
+    applyPendingSpriteActions(imageName);
+    if (typeof applyRealmObjectVisibility === "function") {
+      applyRealmObjectVisibility(imageName);
+    }
+
+    if (typeof applyPendingCameraFollows === "function") {
+      applyPendingCameraFollows();
+    }
+    if (typeof applyPendingScrollFactors === "function") {
+      applyPendingScrollFactors();
+    }
   });
 
   scene.load.start();
 }
 
 function showImage(imageName) {
-  scene[imageName].setVisible(true)
+  withSprite(imageName, (image) => image.setVisible(true), "showImage()");
 }
 
 function hideImage(imageName) {
-  scene[imageName].setVisible(false)
+  withSprite(imageName, (image) => image.setVisible(false), "hideImage()");
 }
 
 function clickImage(imageName) {
-  scene[imageName].on('pointerdown', () => {
-    console.log(imageName + ' clicked!');
-    Shiny.setInputValue(
-      imageName + '_click',
-      true
-    )
-  });
+  withSprite(imageName, (image) => {
+    if (image.shinyClickBound) return;
+
+    if (!image.input) image.setInteractive();
+    image.on('pointerdown', () => {
+      console.log(imageName + ' clicked!');
+      Shiny.setInputValue(
+        imageName + '_click',
+        true,
+        { priority: 'event' }
+      );
+    });
+    image.shinyClickBound = true;
+  }, "clickImage()");
 }

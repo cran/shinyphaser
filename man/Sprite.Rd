@@ -13,13 +13,24 @@ with PhaserGame$add_sprite() method.
 \item \href{#method-Sprite-new}{\code{Sprite$new()}}
 \item \href{#method-Sprite-add_animation}{\code{Sprite$add_animation()}}
 \item \href{#method-Sprite-play_animation}{\code{Sprite$play_animation()}}
+\item \href{#method-Sprite-stop_motion}{\code{Sprite$stop_motion()}}
+\item \href{#method-Sprite-show}{\code{Sprite$show()}}
+\item \href{#method-Sprite-hide}{\code{Sprite$hide()}}
 \item \href{#method-Sprite-add_player_controls}{\code{Sprite$add_player_controls()}}
+\item \href{#method-Sprite-set_player_animation_prefix}{\code{Sprite$set_player_animation_prefix()}}
+\item \href{#method-Sprite-follow_camera}{\code{Sprite$follow_camera()}}
+\item \href{#method-Sprite-stop_camera_follow}{\code{Sprite$stop_camera_follow()}}
+\item \href{#method-Sprite-set_scroll_factor}{\code{Sprite$set_scroll_factor()}}
+\item \href{#method-Sprite-set_depth}{\code{Sprite$set_depth()}}
+\item \href{#method-Sprite-set_body_size}{\code{Sprite$set_body_size()}}
+\item \href{#method-Sprite-set_depth_by_y}{\code{Sprite$set_depth_by_y()}}
 \item \href{#method-Sprite-set_velocity_x}{\code{Sprite$set_velocity_x()}}
 \item \href{#method-Sprite-set_velocity_y}{\code{Sprite$set_velocity_y()}}
 \item \href{#method-Sprite-set_gravity}{\code{Sprite$set_gravity()}}
 \item \href{#method-Sprite-set_bounce}{\code{Sprite$set_bounce()}}
 \item \href{#method-Sprite-destroy}{\code{Sprite$destroy()}}
 \item \href{#method-Sprite-set_in_motion}{\code{Sprite$set_in_motion()}}
+\item \href{#method-Sprite-start_approach_on_sight}{\code{Sprite$start_approach_on_sight()}}
 \item \href{#method-Sprite-clone}{\code{Sprite$clone()}}
 }
 }
@@ -124,6 +135,45 @@ before reverting to idle (defaults to Inf, which loops indefinitely until anothe
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-stop_motion"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-stop_motion}{}}}
+\subsection{Method \code{stop_motion()}}{
+Stop this sprite's current scripted movement.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$stop_motion()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisible; sends a custom message to the client.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-show"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-show}{}}}
+\subsection{Method \code{show()}}{
+Show this sprite.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$show()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisible; sends a custom message to the client.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-hide"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-hide}{}}}
+\subsection{Method \code{hide()}}{
+Hide this sprite.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$hide()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisible; sends a custom message to the client.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Sprite-add_player_controls"></a>}}
 \if{latex}{\out{\hypertarget{method-Sprite-add_player_controls}{}}}
 \subsection{Method \code{add_player_controls()}}{
@@ -143,6 +193,145 @@ Enable movement controls (arrow keys) for a player sprite.
 \item{\code{speed}}{Numeric. Movement speed in pixels/second (default: 200).}
 }
 \if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-set_player_animation_prefix"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-set_player_animation_prefix}{}}}
+\subsection{Method \code{set_player_animation_prefix()}}{
+Choose the animation prefix used by player controls.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$set_player_animation_prefix(prefix)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Character. Prefix for idle and directional movement animation keys.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisible; sends a custom message to the client.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-follow_camera"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-follow_camera}{}}}
+\subsection{Method \code{follow_camera()}}{
+Make the camera follow this sprite as it moves through the world.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$follow_camera(lerp_x = 1, lerp_y = 1, round_pixels = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{lerp_x}}{Numeric. Horizontal interpolation factor from 0 to 1 (default: 1).}
+
+\item{\code{lerp_y}}{Numeric. Vertical interpolation factor from 0 to 1 (default: 1).}
+
+\item{\code{round_pixels}}{Logical. Whether to round camera pixels to avoid sub-pixel rendering (default: TRUE).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-stop_camera_follow"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-stop_camera_follow}{}}}
+\subsection{Method \code{stop_camera_follow()}}{
+Stop the camera from following this sprite.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$stop_camera_follow()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-set_scroll_factor"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-set_scroll_factor}{}}}
+\subsection{Method \code{set_scroll_factor()}}{
+Set how much this sprite scrolls with the camera.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$set_scroll_factor(x, y = x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Numeric. Horizontal scroll factor (0 = fixed to viewport, 1 = scrolls with world).}
+
+\item{\code{y}}{Numeric. Vertical scroll factor. Defaults to \code{x}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-set_depth"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-set_depth}{}}}
+\subsection{Method \code{set_depth()}}{
+Set the sprite's rendering depth. Objects with a larger
+depth are rendered in front of objects with a smaller depth.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$set_depth(depth)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{depth}}{Numeric. Phaser rendering depth.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This sprite object, invisibly, to support method chaining.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-set_body_size"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-set_body_size}{}}}
+\subsection{Method \code{set_body_size()}}{
+Set a collision body size and its offset within the unscaled
+sprite frame. Calls made before the sprite loads are queued.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$set_body_size(width, height, offset_x = 0, offset_y = 0)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{width, height}}{Positive numeric. Body size in frame pixels.}
+
+\item{\code{offset_x, offset_y}}{Numeric. Offset from the frame's top-left corner.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This sprite, invisibly.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-set_depth_by_y"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-set_depth_by_y}{}}}
+\subsection{Method \code{set_depth_by_y()}}{
+Continuously set drawing depth to the sprite's y-coordinate
+plus an offset, in the browser. Disable to retain the current depth;
+set_depth() also disables automatic depth sorting.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$set_depth_by_y(offset = 0, enabled = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{offset}}{Numeric. Vertical distance from the sprite origin to its
+ground point, in world pixels (40 for the example's centered Orc).}
+
+\item{\code{enabled}}{Logical. Whether to update depth each frame.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This sprite, invisibly.
 }
 }
 \if{html}{\out{<hr>}}
@@ -250,6 +439,46 @@ Move sprite along a vector for a set distance.
 \item{\code{distance}}{Numeric. Distance in pixels to travel before stopping.}
 
 \item{\code{lag}}{Numeric. Optional delay before sending the command (defaults to distance/speed).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Sprite-start_approach_on_sight"></a>}}
+\if{latex}{\out{\hypertarget{method-Sprite-start_approach_on_sight}{}}}
+\subsection{Method \code{start_approach_on_sight()}}{
+Start client-side sight checks that make this sprite alert,
+wander while the target is out of range, and approach the target when
+it is in range. This is a reusable browser-side behaviour rather than
+an RPG-specific rule.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Sprite$start_approach_on_sight(
+  target_name,
+  sight_range,
+  speed,
+  distance,
+  check_interval = 250,
+  alert_duration = 1200,
+  wander_interval = 1500
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{target_name}}{Character. Name of the target sprite to approach.}
+
+\item{\code{sight_range}}{Numeric. Maximum distance in pixels at which the target is noticed.}
+
+\item{\code{speed}}{Numeric. Approach speed in pixels/second.}
+
+\item{\code{distance}}{Numeric. Distance in pixels to travel for each approach step.}
+
+\item{\code{check_interval}}{Numeric. Milliseconds between sight checks.}
+
+\item{\code{alert_duration}}{Numeric. Milliseconds to show the alert while approaching.}
+
+\item{\code{wander_interval}}{Numeric. Milliseconds between random movements while the target is out of sight.}
 }
 \if{html}{\out{</div>}}
 }

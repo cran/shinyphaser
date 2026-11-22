@@ -54,3 +54,38 @@ test_that("Sprite add_animation sends explicit frame_count when provided", {
   expect_length(msgs, 2)
   expect_match(msgs[[2]]$message$js, "addSpriteAnimation\\(\"hero\",\"run\",\"run.png\",32,32,6,24\\);")
 })
+
+test_that("Sprite show and hide send visibility commands", {
+  session <- make_mock_session()
+  sprite <- Sprite$new("hero", "hero.png", 0, 0, 16, 16, 1, 8, session)
+
+  sprite$hide()
+  sprite$show()
+
+  msgs <- vapply(session$get_messages(), function(m) m$message$js, character(1))
+  expect_true(any(grepl("hideObject\\('hero'\\);", msgs)))
+  expect_true(any(grepl("showObject\\('hero'\\);", msgs)))
+})
+  
+test_that("Sprite can select a player animation prefix", {
+  session <- make_mock_session()
+  sprite <- Sprite$new(
+    name = "hero",
+    url = "hero.png",
+    x = 0,
+    y = 0,
+    frame_width = 16,
+    frame_height = 16,
+    frame_rate = 8,
+    session = session
+  )
+
+  sprite$set_player_animation_prefix("hero_orc")
+
+  msgs <- session$get_messages()
+  expect_length(msgs, 2)
+  expect_match(
+    msgs[[2]]$message$js,
+    'setPlayerAnimationPrefix\\("hero", "hero_orc"\\);'
+  )
+})
